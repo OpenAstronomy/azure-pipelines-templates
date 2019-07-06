@@ -29,7 +29,6 @@ Below I'm using the endpoint name ``sunpyorg``.
         name: sunpy/azure-pipelines-template
         ref: master
 
-
 This will make the templates in this repository available in the ``sunpy`` namespace.
 Note the ref allows you to pin the template version you want, you can use ``refs/master`` if you want latest version.
 
@@ -59,8 +58,8 @@ Here ``py37-offline`` is the name of a tox environment that is in the SunPy's `t
 
 Th parameters are:
 
-* ``name`` : Name of the build
-* ``os``: The operating system to use - ``windows``, ``macos``, ``linux``
+* ``name`` : Name of the build.
+* ``os``: The operating system to use - ``windows``, ``macos``, ``linux``.
 * ``tox`` : The name of the tox environment as well as any extra inputs to pytest.
 
 publish-pypi.yml
@@ -79,10 +78,12 @@ Example
     - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/tags/') }}:
       - template: publish-pypi.yml@sunpy
         parameters:
-          pypi_remote: 'pypi_sunpy'
+          external_feed: 'pypi_sunpy'
+          pypi_remote: 'test'
           dependsOn: [Linux_37_offline]
 
 The parameters are:
 
-* ``pypi_remote`` - The pypi remote to upload to.
-* ``dependsOn`` - Jobs this job depends on.
+* ``external_feed`` - The "Connection name" of the "Python package upload service connection".
+* ``dependsOn`` - Names of jobs this job depends on.
+* ``pypi_remote`` - The "EndpointName" of the "Python package upload service connection".

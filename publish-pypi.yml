@@ -1,6 +1,6 @@
 parameters:
-  external_feed: ''
-  pypi_remote: ''
+  external_feed: 'pypi_sunpy'
+  pypi_remote: 'test'
   dependsOn: []
 
 jobs:
@@ -85,6 +85,6 @@ jobs:
   - task: DownloadPipelineArtifact@1
   - task: TwineAuthenticate@0
     inputs:
-      externalFeeds: 'pypi_sunpy'
-  - script: 'python3.7 -m twine upload -r test --config-file $(PYPIRC_PATH) $(System.ArtifactsDirectory)/*/*'
+      externalFeeds: ${{ parameters.external_feed}}
+  - script:  ${{ format('python3.7 -m twine upload -r {0} --config-file $(PYPIRC_PATH) "$(System.ArtifactsDirectory)/*/*"', parameters.pypi_remote) }}
     displayName: "upload sdist and wheels to PyPi"
