@@ -11,12 +11,13 @@ jobs:
   steps:
   - ${{ if eq(parameters.os, 'linux') }}:
     - script: |
-        sudo apt-get install -y libopenjpeg5
+        sudo apt-get install -y libopenjpeg5 libfftw3-dev
       displayName: apt install openjpeg
 
   - ${{ if eq(parameters.os, 'macos') }}:
     - script: |
         brew install openjpeg
+        brew install fftw
       displayName: brew install openjpeg
 
   - ${{ if contains(parameters.tox, 'conda') }}:
