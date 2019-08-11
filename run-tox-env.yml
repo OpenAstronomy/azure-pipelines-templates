@@ -17,23 +17,23 @@ jobs:
 
   steps:
 
-  - ${{ if and(parameters.jpeg, eq(parameters.os, 'linux')) }}:
+  - ${{ if and(eq(parameters.jpeg, 'true'), eq(parameters.os, 'linux')) }}:
     - script: |
         sudo apt-get install -y libopenjpeg5
       displayName: apt install openjpeg
 
-  - ${{ if and(parameters.jpeg, eq(parameters.os, 'macos')) }}:
+  - ${{ if and(eq(parameters.jpeg, 'true'), eq(parameters.os, 'macos')) }}:
     - script: |
         brew install openjpeg
       displayName: brew install openjpeg
 
 
-  - ${{ if and(parameters.fftw, eq(parameters.os, 'linux')) }}:
+  - ${{ if and(eq(parameters.fftw, 'true'), eq(parameters.os, 'linux')) }}:
     - script: |
         sudo apt-get install -y libfftw3-dev
       displayName: apt install fftw
 
-  - ${{ if and(parameters.fftw, eq(parameters.os, 'macos')) }}:
+  - ${{ if and(eq(parameters.fftw, 'true'), eq(parameters.os, 'macos')) }}:
     - script: |
         brew install fftw
       displayName: brew install fftw
