@@ -16,6 +16,8 @@ jobs:
       vmImage: Ubuntu 16.04
 
   steps:
+    - checkout: self
+      submodules: false
 
   - ${{ if and(eq(parameters.jpeg, 'true'), eq(parameters.os, 'linux')) }}:
     - script: |
