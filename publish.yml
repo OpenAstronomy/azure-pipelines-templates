@@ -68,6 +68,7 @@ jobs:
       - ${{ if parameters.test_command }}:
         - script: ${{ parameters.test_command }}
           displayName: "Test source distribution"
+          workingDirectory: $(Agent.TempDirectory)
       - publish: 'wheelhouse'
         artifact: ${{ target }}
 
