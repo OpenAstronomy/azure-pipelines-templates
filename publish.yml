@@ -84,10 +84,12 @@ jobs:
   - script: 'python -m pip install -U --user --force-reinstall twine'
     displayName: "install twine"
   # Get all artifacts from this build
-  - task: DownloadPipelineArtifact@2
-    inputs:
-      buildType: 'current'
-      targetPath: 'wheelhouse'
+  - ${{ each target in parameters.targets }}:
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        buildType: 'current'
+        targetPath: 'wheelhouse'
+        artifactName: ${{ target }}
   - script: 'ls -R wheelhouse'
   - task: TwineAuthenticate@0
     inputs:
