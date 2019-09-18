@@ -97,5 +97,5 @@ jobs:
         externalFeeds: ${{ parameters.external_feed}}
       ${{ if parameters.artifact_feed }}:
         artifactFeeds: ${{ parameters.artifact_feed}}
-  - script:  ${{ format('python3.7 -m twine upload -r {0} --config-file $(PYPIRC_PATH) "wheelhouse/*/*"', parameters.pypi_remote) }}
+  - script:  ${{ format('python3.7 -m twine upload -r {0} --config-file $(PYPIRC_PATH) "wheelhouse/*"', parameters.pypi_remote) }}
     displayName: "upload sdist and wheels to PyPi"
