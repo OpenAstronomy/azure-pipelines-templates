@@ -56,11 +56,15 @@ jobs:
         displayName: "Install build tools"
       - script: 'python -m pep517.build --source --out-dir wheelhouse .'
         displayName: "Build source distribution"
-      - script: ${{ format('python -m pip install $(find wheelhouse -name "*.tar.gz")[{0}]', parameters.test_extras) }}
-        displayName: "Installing source distribution"
+      - ${{ if parameters.test_extras }}:
+        - script: ${{ format('python -m pip install $(find wheelhouse -name "*.tar.gz")[{0}]', parameters.test_extras) }}
+          displayName: "Installing source distribution"
+      - ${{ if not(parameters.test_extras) }}:
+        - script: 'python -m pip install $(find wheelhouse -name "*.tar.gz")'
+          displayName: "Installing source distribution"
       - ${{ if parameters.test_command }}:
-          - script: ${{ parameters.test_command }}
-            displayName: "Test source distribution"
+        - script: ${{ parameters.test_command }}
+          displayName: "Test source distribution"
       - publish: 'wheelhouse'
         artifact: 'sdist'
 
@@ -76,12 +80,16 @@ jobs:
   - script: 'python -m pip install -U --user --force-reinstall twine'
     displayName: "install twine"
   # Get all artifacts from this build
-  - download: current
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      buildType: 'current'
+      targetPath: 'wheelhouse'
+  - script: 'ls -R wheelhouse'
   - task: TwineAuthenticate@0
     inputs:
       ${{ if parameters.external_feed }}:
         externalFeeds: ${{ parameters.external_feed}}
       ${{ if parameters.artifact_feed }}:
         artifactFeeds: ${{ parameters.artifact_feed}}
-  - script:  ${{ format('python3.7 -m twine upload -r {0} --config-file $(PYPIRC_PATH) "$(System.ArtifactsDirectory)/*/*"', parameters.pypi_remote) }}
+  - script:  ${{ format('python3.7 -m twine upload -r {0} --config-file $(PYPIRC_PATH) "wheelhouse/*/*"', parameters.pypi_remote) }}
     displayName: "upload sdist and wheels to PyPi"
