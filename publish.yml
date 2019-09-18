@@ -9,6 +9,8 @@ jobs:
   - ${{ if or(eq(target, 'wheels_macosx'), eq(target, 'wheels_linux'), eq(target, 'wheels_windows')) }}:
 
     - job: ${{ target }}
+      dependsOn: ${{ parameters.dependsOn }}
+      condition: succeeded()
 
       variables:
         CIBW_TEST_COMMAND: ${{ parameters.test_command }}
@@ -43,6 +45,7 @@ jobs:
 
   - ${{ if eq(target, 'sdist') }}:
     - job: ${{ target }}
+      dependsOn: ${{ parameters.dependsOn }}
       condition: succeeded()
       pool: {vmImage: 'Ubuntu-16.04'}
       steps:
@@ -66,7 +69,7 @@ jobs:
         - script: ${{ parameters.test_command }}
           displayName: "Test source distribution"
       - publish: 'wheelhouse'
-        artifact: 'sdist'
+        artifact: ${{ target }}
 
 - job: publish
   dependsOn: ${{ parameters.targets }}
@@ -75,8 +78,9 @@ jobs:
   steps:
   - checkout: none
   - task: UsePythonVersion@0
-    displayName: setup python3.7
-    inputs: {versionSpec: '3.7'}
+    inputs:
+      versionSpec: '3.7'
+    displayName: Install Python 3.7
   - script: 'python -m pip install -U --user --force-reinstall twine'
     displayName: "install twine"
   # Get all artifacts from this build
