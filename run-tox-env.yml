@@ -1,6 +1,7 @@
 parameters:
   libraries: []
   envs: []
+  coverage: false
 
 jobs:
 - ${{ each env in parameters.envs }}:
@@ -102,13 +103,14 @@ jobs:
             env:
               DISPLAY: :99.0
 
-        - script: |
-            python -m pip install --upgrade codecov
-            python -m codecov --name "${{ variables.friendly_name }}"
-          displayName: Running codecov
-          condition: succeededOrFailed()
-          env:
-            CODECOV_TOKEN: $(CODECOV_TOKEN)
+        - ${{ eq(coalesce(env['coverage'], parameters.coverage), 'codecov') }}:
+          - script: |
+              python -m pip install --upgrade codecov
+              python -m codecov --name "${{ variables.friendly_name }}"
+            displayName: Running codecov
+            condition: succeededOrFailed()
+            env:
+              CODECOV_TOKEN: $(CODECOV_TOKEN)
 
         - task: PublishTestResults@2
           condition: succeededOrFailed()
