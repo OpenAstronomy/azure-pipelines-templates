@@ -7,7 +7,7 @@ jobs:
   - ${{ each env_pair in env }}:
 
     - job: ${{ variables['Agent.Id'] }}
-      displayName: '${{ env_pair.key }} ${{ env_pair.value }}'
+      displayName: '${{ env_pair.value }} [${{ env_pair.key }} ]'
       pool:
         ${{ if eq(env_pair.key, 'macosx') }}:
           vmImage: macOS 10.13
