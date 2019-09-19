@@ -67,13 +67,13 @@ jobs:
 
         - ${{ if contains(env_pair.value, 'conda') }}:
 
-          - bash: |
+          - script: |
               echo "##vso[task.prependpath]$CONDA/bin"
               conda create --yes --quiet --name myEnvironment python=${{ variables.python }} pip
-              conda init bash
+              conda init
             displayName: Create conda environemnt
 
-          - bash: |
+          - script: |
               conda activate myEnvironment
             displayName: Activate conda environemnt
 
