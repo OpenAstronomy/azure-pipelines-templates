@@ -7,7 +7,7 @@ jobs:
   - ${{ each env_pair in env }}:
 
     - job: job
-      displayName: ${{ pair.key }}_${{ pair.value }}
+      displayName: ${{ env_pair.key }}_${{ env_pair.value }}
       pool:
         ${{ if eq(env_pair.key, 'macosx') }}:
           vmImage: macOS 10.13
@@ -35,11 +35,11 @@ jobs:
 
       - task: UsePythonVersion@0
         inputs:
-          ${{ if startsWith(pair.value, 'py27') }}:
+          ${{ if startsWith(env_pair.value, 'py27') }}:
             versionSpec: '2.7'
-          ${{ if startsWith(pair.value, 'py36') }}:
+          ${{ if startsWith(env_pair.value, 'py36') }}:
             versionSpec: '3.6'
-          ${{ if startsWith(pair.value, 'py37') }}:
+          ${{ if startsWith(env_pair.value, 'py37') }}:
             versionSpec: '3.7'
 
       - ${{ if contains(parameters.tox, 'conda') }}:
@@ -50,13 +50,13 @@ jobs:
             conda activate myEnvironment
           displayName: Create conda environemnt
 
-        - ${{ if startsWith(pair.value, 'py27') }}:
+        - ${{ if startsWith(env_pair.value, 'py27') }}:
           - script: conda install --yes --quiet python=2.7 pip
             displayName: Installing Python 2.7 in conda environment
-        - ${{ if startsWith(pair.value, 'py36') }}:
+        - ${{ if startsWith(env_pair.value, 'py36') }}:
           - script: conda install --yes --quiet python=3.6 pip
             displayName: Installing Python 3.6 in conda environment
-        - ${{ if startsWith(pair.value, 'py37') }}:
+        - ${{ if startsWith(env_pair.value, 'py37') }}:
           - script: conda install --yes --quiet python=3.7 pip
             displayName: Installing Python 3.7 in conda environment
 
@@ -73,7 +73,7 @@ jobs:
 
       - script: |
           python -m pip install --upgrade codecov
-          python -m codecov --name ${{ pair.key }}_${{ pair.value }}
+          python -m codecov --name ${{ env_pair.key }}_${{ env_pair.value }}
         displayName: Running codecov
         condition: succeededOrFailed()
 
@@ -81,7 +81,7 @@ jobs:
         condition: succeededOrFailed()
         inputs:
           testResultsFiles: '**/test-*.xml'
-          testRunTitle: 'Publish test results for ${{ pair.key }}_${{ pair.value }}'
+          testRunTitle: 'Publish test results for ${{ env_pair.key }}_${{ env_pair.value }}'
 
   # - ${{ if contains(parameters.tox, 'online') }}:
   #   - task: PublishCodeCoverageResults@1
