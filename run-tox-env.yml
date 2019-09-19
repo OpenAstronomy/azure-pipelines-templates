@@ -24,6 +24,10 @@ jobs:
             python: '3.8'
           ${{ if not(startsWith(env_pair.value, 'py')) }}:
             python: '3.x'
+          ${{ if eq(env_pair.key, 'windows') }}:
+            source: "call"
+          ${{ if not(eq(env_pair.key, 'windows')) }}:
+            source: "source"
 
         displayName: ${{ variables.friendly_name }}
 
@@ -66,22 +70,25 @@ jobs:
             displayName: Starting Xvfb
 
         - ${{ if contains(env_pair.value, 'conda') }}:
-          - ${{ if not(eq(env_pair.key, 'linux')) }}:
-            - task: CondaEnvironment@1
-              inputs:
-                createCustomEnvironment: true
-                environmentName: 'testenv'
-                packageSpecs: 'python=${{ variables.python }} pip'
-                updateConda: true
-                cleanEnvironment: true
-              displayName: Create conda environemnt
+          - ${{ if eq(env_pair.key, 'macosx') }}:
+            - bash: echo "##vso[task.prependpath]$CONDA/bin"
+              displayName: Add conda to PATH
+            - bash: sudo chown -R $USER $CONDA
+              displayName: Take ownership of conda installation
 
           - ${{ if eq(env_pair.key, 'linux') }}:
-            - script: |
-                echo "##vso[task.prependpath]$CONDA/bin"
-                conda create --yes --quiet --name testenv
-                source activate myEnvironment
-                conda install --yes --quiet --name testenv python=${{ variables.python }} pip
+            - bash: echo "##vso[task.prependpath]$CONDA/bin"
+              displayName: Add conda to PATH
+
+          - ${{ if eq(env_pair.key, 'windows') }}:
+            - powershell: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
+              displayName: Add conda to PATH
+
+          - script: |
+              conda create --yes --quiet --name testenv
+              ${{ variables.source }} activate testenv
+              conda install --yes --quiet --name testenv python=${{ variables.python }} pip
+            displayName: Create and activate conda env
 
           - script: python -m pip install --upgrade tox-conda
             displayName: install tox-conda
