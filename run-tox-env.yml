@@ -12,10 +12,16 @@ jobs:
           friendly_name: '${{ env_pair.value }} [${{ env_pair.key }}]'
           ${{ if startsWith(env_pair.value, 'py27') }}:
             python: '2.7'
+          ${{ if startsWith(env_pair.value, 'py34') }}:
+            python: '3.4'
+          ${{ if startsWith(env_pair.value, 'py35') }}:
+            python: '3.5'
           ${{ if startsWith(env_pair.value, 'py36') }}:
             python: '3.6'
           ${{ if startsWith(env_pair.value, 'py37') }}:
             python: '3.7'
+          ${{ if startsWith(env_pair.value, 'py38') }}:
+            python: '3.8'
           ${{ if not(startsWith(env_pair.value, 'py')) }}:
             python: '3.x'
 
