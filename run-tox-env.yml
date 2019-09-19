@@ -24,11 +24,6 @@ jobs:
             python: '3.8'
           ${{ if not(startsWith(env_pair.value, 'py')) }}:
             python: '3.x'
-          ${{ if not(eq(env_pair.key, 'windows')) }}:
-            conda_prefix: 'source '
-          ${{ if eq(env_pair.key, 'windows') }}:
-            conda_prefix: ''
-          libraries: ${{ coalesce(env['libraries'], parameters.libraries) }}
 
         displayName: ${{ variables.friendly_name }}
 
@@ -44,7 +39,7 @@ jobs:
         - checkout: self
           submodules: ${{ coalesce(parameters.submodules, true) }}
 
-        - ${{ each tool_pair in variables.libraries }}:
+        - ${{ each tool_pair in coalesce(env['libraries'], parameters.libraries) }}:
           - ${{ each library in tool_pair.value }}:
             - ${{ if and(eq(tool_pair.key, 'brew'), eq(env_pair.key, 'macosx')) }}:
               - script: brew install ${{ library }}
