@@ -6,8 +6,18 @@ jobs:
 - ${{ each env in parameters.envs }}:
   - ${{ each env_pair in env }}:
 
-    - job: ${{ variables['Agent.Id'] }}
-      displayName: '${{ env_pair.value }} [${{ env_pair.key }}]'
+    - job: ${{ coalesce(env_pair.value['name'], variables['Agent.Id']) }}
+      variables:
+        friendly_name: '${{ env_pair.value }} [${{ env_pair.key }}]'
+        ${{ if startsWith(env_pair.value, 'py27') }}:
+          python_version: '2.7'
+        ${{ if startsWith(env_pair.value, 'py36') }}:
+          python_version: '3.6'
+        ${{ if startsWith(env_pair.value, 'py37') }}:
+          python_version: '3.7'
+
+      displayName: ${{ friendly_name }}
+
       pool:
         ${{ if eq(env_pair.key, 'macosx') }}:
           vmImage: macOS 10.13
@@ -17,7 +27,6 @@ jobs:
           vmImage: vs2017-win2016
 
       steps:
-
       - checkout: self
         submodules: ${{ coalesce(parameters.submodules, true) }}
 
@@ -26,21 +35,18 @@ jobs:
           - ${{ if and(eq(tool_pair.key, 'brew'), eq(env_pair.key, 'macosx')) }}:
             - script: brew install ${{ library }}
               displayName: Installing ${{ library }} with brew
+
           - ${{ if and(eq(tool_pair.key, 'apt'), eq(env_pair.key, 'linux')) }}:
             - script: sudo apt-get install -y ${{ library }}
               displayName: Installing ${{ library }} with apt
+
           - ${{ if and(eq(tool_pair.key, 'choco'), eq(env_pair.key, 'windows')) }}:
             - script: choco install ${{ library }}
               displayName: Installing ${{ library }} with choco
 
       - task: UsePythonVersion@0
         inputs:
-          ${{ if startsWith(env_pair.value, 'py27') }}:
-            versionSpec: '2.7'
-          ${{ if startsWith(env_pair.value, 'py36') }}:
-            versionSpec: '3.6'
-          ${{ if startsWith(env_pair.value, 'py37') }}:
-            versionSpec: '3.7'
+            versionSpec: ${{ python_version }}
 
       - ${{ if and(eq(parameters.xvfb, 'true'), eq(env_pair.key, 'linux')) }}:
         - bash: |
@@ -54,19 +60,9 @@ jobs:
 
         - script: |
             echo "##vso[task.prependpath]$CONDA/bin"
-            conda create --yes --quiet --name myEnvironment
+            conda create --yes --quiet --name myEnvironment python=${{ python_version }} pip
             conda activate myEnvironment
           displayName: Create conda environemnt
-
-        - ${{ if startsWith(env_pair.value, 'py27') }}:
-          - script: conda install --yes --quiet python=2.7 pip
-            displayName: Installing Python 2.7 in conda environment
-        - ${{ if startsWith(env_pair.value, 'py36') }}:
-          - script: conda install --yes --quiet python=3.6 pip
-            displayName: Installing Python 3.6 in conda environment
-        - ${{ if startsWith(env_pair.value, 'py37') }}:
-          - script: conda install --yes --quiet python=3.7 pip
-            displayName: Installing Python 3.7 in conda environment
 
         - script: python -m pip install --upgrade tox-conda
           displayName: install tox-conda
@@ -74,22 +70,15 @@ jobs:
       - script: python -m pip install --upgrade tox
         displayName: Install tox
 
-      - ${{ if contains(env_pair.value, ' -- ') }}:
-        - script: tox -e ${{ env_pair.value }} --junitxml=junit/test-results.xml --cov-report=xml
-          displayName: Running tox
-          ${{ if and(parameters.xvfb, eq(variables['Agent.OS'], 'Linux')) }}:
-            env:
-              DISPLAY: :99.0
-      - ${{ if not(contains(env_pair.value, ' -- ')) }}:
-        - script: tox -e ${{ env_pair.value }} -- --junitxml=junit/test-results.xml --cov-report=xml
-          displayName: Running tox
-          ${{ if and(parameters.xvfb, eq(variables['Agent.OS'], 'Linux')) }}:
-            env:
-              DISPLAY: :99.0
+      - script: tox -e ${{ env_pair.value }} -- --junitxml=junit/test-results.xml --cov-report=xml ${{ env_pair.value['posargs'] }}
+        displayName: Running tox
+        ${{ if and(parameters.xvfb, eq(variables['Agent.OS'], 'Linux')) }}:
+          env:
+            DISPLAY: :99.0
 
       - script: |
           python -m pip install --upgrade codecov
-          python -m codecov --name ${{ env_pair.key }}_${{ env_pair.value }}
+          python -m codecov --name ${{ friendly_name }}
         displayName: Running codecov
         condition: succeededOrFailed()
 
@@ -97,7 +86,7 @@ jobs:
         condition: succeededOrFailed()
         inputs:
           testResultsFiles: '**/test-*.xml'
-          testRunTitle: 'Publish test results for ${{ env_pair.key }}_${{ env_pair.value }}'
+          testRunTitle: 'Publish test results for ${{ friendly_name }}'
 
   # - ${{ if contains(env_pair.value, 'online') }}:
   #   - task: PublishCodeCoverageResults@1
