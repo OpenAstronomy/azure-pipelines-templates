@@ -16,72 +16,72 @@ jobs:
         ${{ if eq(env_pair.key, 'windows') }}:
           vmImage: vs2017-win2016
 
-  steps:
+      steps:
 
-  - checkout: self
-    submodules: ${{ coalesce(parameters.submodules, true) }}
+      - checkout: self
+        submodules: ${{ coalesce(parameters.submodules, true) }}
 
-  - ${{ each tool_pair in parameters.libraries }}:
-    - ${{ each library in tool_pair.value }}:
-      - ${{ if and(eq(tool_pair.key, 'brew'), eq(variables['Agent.OS'], 'Darwin')) }}:
-        - script: brew install ${{ library }}
-          displayName: Installing ${{ library }} with brew
-      - ${{ if and(eq(tool_pair.key, 'apt'), eq(variables['Agent.OS'], 'Linux')) }}:
-        - script: sudo apt-get install -y ${{ library }}
-          displayName: Installing ${{ library }} with apt
-      - ${{ if and(eq(tool_pair.key, 'choco'), eq(variables['Agent.OS'], 'Windows_NT')) }}:
-        - script: choco install ${{ library }}
-          displayName: Installing ${{ library }} with choco
+      - ${{ each tool_pair in parameters.libraries }}:
+        - ${{ each library in tool_pair.value }}:
+          - ${{ if and(eq(tool_pair.key, 'brew'), eq(variables['Agent.OS'], 'Darwin')) }}:
+            - script: brew install ${{ library }}
+              displayName: Installing ${{ library }} with brew
+          - ${{ if and(eq(tool_pair.key, 'apt'), eq(variables['Agent.OS'], 'Linux')) }}:
+            - script: sudo apt-get install -y ${{ library }}
+              displayName: Installing ${{ library }} with apt
+          - ${{ if and(eq(tool_pair.key, 'choco'), eq(variables['Agent.OS'], 'Windows_NT')) }}:
+            - script: choco install ${{ library }}
+              displayName: Installing ${{ library }} with choco
 
-  - task: UsePythonVersion@0
-    inputs:
-      ${{ if startsWith(pair.value, 'py27') }}:
-        versionSpec: '2.7'
-      ${{ if startsWith(pair.value, 'py36') }}:
-        versionSpec: '3.6'
-      ${{ if startsWith(pair.value, 'py37') }}:
-        versionSpec: '3.7'
+      - task: UsePythonVersion@0
+        inputs:
+          ${{ if startsWith(pair.value, 'py27') }}:
+            versionSpec: '2.7'
+          ${{ if startsWith(pair.value, 'py36') }}:
+            versionSpec: '3.6'
+          ${{ if startsWith(pair.value, 'py37') }}:
+            versionSpec: '3.7'
 
-  - ${{ if contains(parameters.tox, 'conda') }}:
+      - ${{ if contains(parameters.tox, 'conda') }}:
 
-    - script: |
-        echo "##vso[task.prependpath]$CONDA/bin"
-        conda create --yes --quiet --name myEnvironment
-        conda activate myEnvironment
-      displayName: Create conda environemnt
+        - script: |
+            echo "##vso[task.prependpath]$CONDA/bin"
+            conda create --yes --quiet --name myEnvironment
+            conda activate myEnvironment
+          displayName: Create conda environemnt
 
-    - ${{ if startsWith(pair.value, 'py27') }}:
-      - script: conda install --yes --quiet python=2.7 pip
-        displayName: Installing Python 2.7 in conda environment
-    - ${{ if startsWith(pair.value, 'py36') }}:
-      - script: conda install --yes --quiet python=3.6 pip
-        displayName: Installing Python 3.6 in conda environment
-    - ${{ if startsWith(pair.value, 'py37') }}:
-      - script: conda install --yes --quiet python=3.7 pip
-        displayName: Installing Python 3.7 in conda environment
+        - ${{ if startsWith(pair.value, 'py27') }}:
+          - script: conda install --yes --quiet python=2.7 pip
+            displayName: Installing Python 2.7 in conda environment
+        - ${{ if startsWith(pair.value, 'py36') }}:
+          - script: conda install --yes --quiet python=3.6 pip
+            displayName: Installing Python 3.6 in conda environment
+        - ${{ if startsWith(pair.value, 'py37') }}:
+          - script: conda install --yes --quiet python=3.7 pip
+            displayName: Installing Python 3.7 in conda environment
 
-    - script: python -m pip install --upgrade tox-conda
-      displayName: install tox-conda
+        - script: python -m pip install --upgrade tox-conda
+          displayName: install tox-conda
 
-  - script: python -m pip install --upgrade tox
-    displayName: Install tox
+      - script: python -m pip install --upgrade tox
+        displayName: Install tox
 
-  - script: tox -e ${{ parameters.tox }} --junitxml=junit/test-results.xml --cov-report=xml
-    displayName: Running tox
-    # env:
-    #   DISPLAY: :99.0
+      - script: tox -e ${{ parameters.tox }} --junitxml=junit/test-results.xml --cov-report=xml
+        displayName: Running tox
+        # env:
+        #   DISPLAY: :99.0
 
-  - script: |
-      python -m pip install --upgrade codecov
-      python -m codecov --name ${{ pair.key }}_${{ pair.value }}
-    displayName: Running codecov
-    condition: succeededOrFailed()
+      - script: |
+          python -m pip install --upgrade codecov
+          python -m codecov --name ${{ pair.key }}_${{ pair.value }}
+        displayName: Running codecov
+        condition: succeededOrFailed()
 
-  - task: PublishTestResults@2
-    condition: succeededOrFailed()
-    inputs:
-      testResultsFiles: '**/test-*.xml'
-      testRunTitle: 'Publish test results for ${{ pair.key }}_${{ pair.value }}'
+      - task: PublishTestResults@2
+        condition: succeededOrFailed()
+        inputs:
+          testResultsFiles: '**/test-*.xml'
+          testRunTitle: 'Publish test results for ${{ pair.key }}_${{ pair.value }}'
 
   # - ${{ if contains(parameters.tox, 'online') }}:
   #   - task: PublishCodeCoverageResults@1
