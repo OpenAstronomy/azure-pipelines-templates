@@ -23,13 +23,13 @@ jobs:
 
       - ${{ each tool_pair in parameters.libraries }}:
         - ${{ each library in tool_pair.value }}:
-          - ${{ if and(eq(tool_pair.key, 'brew'), eq(variables['Agent.OS'], 'Darwin')) }}:
+          - ${{ if and(eq(tool_pair.key, 'brew'), eq(env_pair.key, 'macosx')) }}:
             - script: brew install ${{ library }}
               displayName: Installing ${{ library }} with brew
-          - ${{ if and(eq(tool_pair.key, 'apt'), eq(variables['Agent.OS'], 'Linux')) }}:
+          - ${{ if and(eq(tool_pair.key, 'apt'), eq(env_pair.key, 'linux')) }}:
             - script: sudo apt-get install -y ${{ library }}
               displayName: Installing ${{ library }} with apt
-          - ${{ if and(eq(tool_pair.key, 'choco'), eq(variables['Agent.OS'], 'Windows_NT')) }}:
+          - ${{ if and(eq(tool_pair.key, 'choco'), eq(env_pair.key, 'windows')) }}:
             - script: choco install ${{ library }}
               displayName: Installing ${{ library }} with choco
 
@@ -42,7 +42,7 @@ jobs:
           ${{ if startsWith(env_pair.value, 'py37') }}:
             versionSpec: '3.7'
 
-      - ${{ if and(eq(parameters.xvfb, 'true'), eq(variables['Agent.OS'], 'Linux')) }}:
+      - ${{ if and(eq(parameters.xvfb, 'true'), eq(env_pair.key, 'linux')) }}:
         - bash: |
             /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid \
                                     --make-pidfile --background --exec /usr/bin/Xvfb \
