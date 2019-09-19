@@ -6,7 +6,7 @@ jobs:
 - ${{ each env in parameters.envs }}:
   - ${{ each env_pair in env }}:
 
-    - job: job
+    - job: ${{ variables['Agent.Id'] }}
       displayName: ${{ env_pair.key }}_${{ env_pair.value }}
       pool:
         ${{ if eq(env_pair.key, 'macosx') }}:
