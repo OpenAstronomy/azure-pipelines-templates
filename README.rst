@@ -117,19 +117,20 @@ To make use of this template, add the following to the ``azure-pipelines.yml`` f
     jobs:
     - template: publish@OpenAstronomy
       parameters:
-        pypi_remote: 'pypi_endpoint'
-        external_feed: 'pypi_endpoint'
+        pypi_connection_name: 'pypi_endpoint'
         targets:
         - sdist
         - wheels_linux
         - wheels_macosx
         - wheels_windows
 
-``pypi_remote`` should be set to the **EndpointName** you set above, and
-``external_feed`` to the **Connection Name**. ``targets`` should be set to a list of builds you want to generate
-- the four options are shown in the example above (wheels for the three main
-platforms and a source distribution) but you can choose to only build some of
-these if you want. The initial ``if`` statement ensures that this process is only
+``pypi_connection_name`` should be set to the **Connection Name** you set above.
+If the endpoint name you set is different from the connection name, you should
+also specify the endpoint name with the ``pypi_endpoint_name`` parameter.
+``targets`` should be set to a list of builds you want to generate - the four
+options are shown in the example above (wheels for the three main platforms and
+a source distribution) but you can choose to only build some of these if you
+want. The initial ``if`` statement ensures that this process is only
 
 If you want to run tests on the generated packages (which we recommend), you can make use of
 the following parameters:
@@ -139,7 +140,7 @@ the following parameters:
     jobs:
     - template: publish@OpenAstronomy
       parameters:
-        pypi_remote: 'test'
+        pypi_connection_name: 'pypi_endpoint'
         test_extras: "all,test"
         test_command: pytest --pyargs sunpy
         targets:
