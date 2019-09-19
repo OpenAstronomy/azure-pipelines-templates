@@ -103,7 +103,7 @@ jobs:
             env:
               DISPLAY: :99.0
 
-        - ${{ eq(coalesce(env['coverage'], parameters.coverage), 'codecov') }}:
+        - ${{ if eq(coalesce(env['coverage'], parameters.coverage), 'codecov') }}:
           - script: |
               python -m pip install --upgrade codecov
               python -m codecov --name "${{ variables.friendly_name }}"
