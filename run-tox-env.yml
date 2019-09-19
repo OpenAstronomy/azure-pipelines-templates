@@ -91,7 +91,7 @@ jobs:
 
         - script: |
             python -m pip install --upgrade codecov
-            python -m codecov --name ${{ variables.friendly_name }}
+            python -m codecov --name "${{ variables.friendly_name }}"
           displayName: Running codecov
           condition: succeededOrFailed()
 
