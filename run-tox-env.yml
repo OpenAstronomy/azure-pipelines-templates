@@ -1,87 +1,92 @@
 parameters:
-  name: ''
-  os: ''
-  tox: ''
-  jpeg: False
-  fftw: False
+  libraries: []
+  envs: []
 
 jobs:
-- job: ${{ format(parameters.name) }}
-  pool:
-    ${{ if eq(parameters.os, 'windows') }}:
-      vmImage: vs2017-win2016
-    ${{ if eq(parameters.os, 'macos') }}:
-      vmImage: macOS 10.14
-    ${{ if eq(parameters.os, 'linux') }}:
-      vmImage: Ubuntu 16.04
+- ${{ each env in parameters.envs }}:
+  - ${{ each env_pair in env }}:
+
+    - job: job
+      displayName: ${{ pair.key }}_${{ pair.value }}
+      pool:
+        ${{ if eq(env_pair.key, 'macosx') }}:
+          vmImage: macOS 10.13
+        ${{ if eq(env_pair.key, 'linux') }}:
+          vmImage: Ubuntu 16.04
+        ${{ if eq(env_pair.key, 'windows') }}:
+          vmImage: vs2017-win2016
 
   steps:
+
   - checkout: self
-    submodules: false
+    submodules: ${{ coalesce(parameters.submodules, true) }}
 
-  - ${{ if and(eq(parameters.jpeg, 'true'), eq(parameters.os, 'linux')) }}:
-    - script: |
-        sudo apt-get install -y libopenjpeg5
-      displayName: apt install openjpeg
+  - ${{ each tool_pair in parameters.libraries }}:
+    - ${{ each library in tool_pair.value }}:
+      - ${{ if and(eq(tool_pair.key, 'brew'), eq(variables['Agent.OS'], 'Darwin')) }}:
+        - script: brew install ${{ library }}
+          displayName: Installing ${{ library }} with brew
+      - ${{ if and(eq(tool_pair.key, 'apt'), eq(variables['Agent.OS'], 'Linux')) }}:
+        - script: sudo apt-get install -y ${{ library }}
+          displayName: Installing ${{ library }} with apt
+      - ${{ if and(eq(tool_pair.key, 'choco'), eq(variables['Agent.OS'], 'Windows_NT')) }}:
+        - script: choco install ${{ library }}
+          displayName: Installing ${{ library }} with choco
 
-  - ${{ if and(eq(parameters.jpeg, 'true'), eq(parameters.os, 'macos')) }}:
-    - script: |
-        brew install openjpeg
-      displayName: brew install openjpeg
-
-
-  - ${{ if and(eq(parameters.fftw, 'true'), eq(parameters.os, 'linux')) }}:
-    - script: |
-        sudo apt-get install -y libfftw3-dev
-      displayName: apt install fftw
-
-  - ${{ if and(eq(parameters.fftw, 'true'), eq(parameters.os, 'macos')) }}:
-    - script: |
-        brew install fftw
-      displayName: brew install fftw
+  - task: UsePythonVersion@0
+    inputs:
+      ${{ if startsWith(pair.value, 'py27') }}:
+        versionSpec: '2.7'
+      ${{ if startsWith(pair.value, 'py36') }}:
+        versionSpec: '3.6'
+      ${{ if startsWith(pair.value, 'py37') }}:
+        versionSpec: '3.7'
 
   - ${{ if contains(parameters.tox, 'conda') }}:
-    - bash: |
+
+    - script: |
         echo "##vso[task.prependpath]$CONDA/bin"
         conda create --yes --quiet --name myEnvironment
-        source activate myEnvironment
-        conda install --yes --quiet --name myEnvironment python=3.6 pip
-      displayName: conda setup
+        conda activate myEnvironment
+      displayName: Create conda environemnt
 
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '3.6'
+    - ${{ if startsWith(pair.value, 'py27') }}:
+      - script: conda install --yes --quiet python=2.7 pip
+        displayName: Installing Python 2.7 in conda environment
+    - ${{ if startsWith(pair.value, 'py36') }}:
+      - script: conda install --yes --quiet python=3.6 pip
+        displayName: Installing Python 3.6 in conda environment
+    - ${{ if startsWith(pair.value, 'py37') }}:
+      - script: conda install --yes --quiet python=3.7 pip
+        displayName: Installing Python 3.7 in conda environment
 
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '3.7'
-
-  - script: pip install --upgrade tox
-    displayName: install tox
-
-  - ${{ if contains(parameters.tox, 'conda') }}:
-    - script: pip install --upgrade tox-conda
+    - script: python -m pip install --upgrade tox-conda
       displayName: install tox-conda
 
-  - script: tox -e ${{ parameters.tox }} --junitxml=junit/test-results.xml --cov-report=xml --cov-report=html
-    displayName: run tox
+  - script: python -m pip install --upgrade tox
+    displayName: Install tox
+
+  - script: tox -e ${{ parameters.tox }} --junitxml=junit/test-results.xml --cov-report=xml
+    displayName: Running tox
+    # env:
+    #   DISPLAY: :99.0
 
   - script: |
-      pip install --upgrade codecov
-      codecov --name ${{ format(parameters.name) }}
-    displayName: run codecov
+      python -m pip install --upgrade codecov
+      python -m codecov --name ${{ pair.key }}_${{ pair.value }}
+    displayName: Running codecov
     condition: succeededOrFailed()
 
   - task: PublishTestResults@2
     condition: succeededOrFailed()
     inputs:
       testResultsFiles: '**/test-*.xml'
-      testRunTitle: 'Publish test results for ${{ format(parameters.name) }}'
+      testRunTitle: 'Publish test results for ${{ pair.key }}_${{ pair.value }}'
 
-  - ${{ if contains(parameters.tox, 'online') }}:
-    - task: PublishCodeCoverageResults@1
-      condition: succeededOrFailed()
-      inputs:
-        codeCoverageTool: Cobertura
-        summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
-        reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+  # - ${{ if contains(parameters.tox, 'online') }}:
+  #   - task: PublishCodeCoverageResults@1
+  #     condition: succeededOrFailed()
+  #     inputs:
+  #       codeCoverageTool: Cobertura
+  #       summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+  #       reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
