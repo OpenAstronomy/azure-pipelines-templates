@@ -42,7 +42,7 @@ jobs:
           ${{ if startsWith(env_pair.value, 'py37') }}:
             versionSpec: '3.7'
 
-      - ${{ if parameters.xvfb }}:
+      - ${{ if and(parameters.xvfb, eq(variables['Agent.OS'], 'Linux')) }}:
         - bash: |
             /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid \
                                     --make-pidfile --background --exec /usr/bin/Xvfb \
