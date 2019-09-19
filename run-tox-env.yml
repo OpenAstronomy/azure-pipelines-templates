@@ -24,6 +24,10 @@ jobs:
             python: '3.8'
           ${{ if not(startsWith(env_pair.value, 'py')) }}:
             python: '3.x'
+          ${{ if not(eq(env_pair.key, 'windows')) }}:
+            conda_prefix: 'source '
+          ${{ if eq(env_pair.key, 'windows') }}:
+            conda_prefix: ''
 
         displayName: ${{ variables.friendly_name }}
 
@@ -70,7 +74,7 @@ jobs:
           - script: |
               echo "##vso[task.prependpath]$CONDA/bin"
               conda create --yes --quiet --name myEnvironment
-              source activate myEnvironment
+              ${{ variables.conda_prefix }}activate myEnvironment
               conda install --yes --quiet --name myEnvironment python=${{ variables.python }} pip
             displayName: Create conda environemnt
 
