@@ -73,7 +73,7 @@ jobs:
         artifact: ${{ target }}
 
 
-- ${{ if parameters.pypi_remote }}:
+- ${{ if coalesce(parameters.pypi_connection_name, parameters.artifact_feed) }}:
   - job: publish
     dependsOn: ${{ parameters.targets }}
     condition: succeeded()
