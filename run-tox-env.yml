@@ -42,7 +42,7 @@ jobs:
           ${{ if startsWith(env_pair.value, 'py37') }}:
             versionSpec: '3.7'
 
-      - ${{ if contains(parameters.tox, 'conda') }}:
+      - ${{ if contains(env_pair.value, 'conda') }}:
 
         - script: |
             echo "##vso[task.prependpath]$CONDA/bin"
@@ -88,7 +88,7 @@ jobs:
           testResultsFiles: '**/test-*.xml'
           testRunTitle: 'Publish test results for ${{ env_pair.key }}_${{ env_pair.value }}'
 
-  # - ${{ if contains(parameters.tox, 'online') }}:
+  # - ${{ if contains(env_pair.value, 'online') }}:
   #   - task: PublishCodeCoverageResults@1
   #     condition: succeededOrFailed()
   #     inputs:
