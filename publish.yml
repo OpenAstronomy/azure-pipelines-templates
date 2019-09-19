@@ -16,9 +16,6 @@ jobs:
         CIBW_TEST_COMMAND: ${{ parameters.test_command }}
         CIBW_TEST_EXTRAS: ${{ parameters.test_extras }}
 
-      checkout: self
-      submodules: ${{ coalesce(parameters.submodules, true) }}
-
       pool:
         ${{ if eq(target, 'wheels_macosx') }}:
           vmImage: macOS 10.13
@@ -28,6 +25,8 @@ jobs:
           vmImage: vs2017-win2016
 
       steps:
+        - checkout: self
+          submodules: ${{ coalesce(parameters.submodules, true) }}
         - ${{ if not(eq(target, 'wheels_windows')) }}:
           - task: UsePythonVersion@0
             inputs:
@@ -53,7 +52,7 @@ jobs:
       pool: {vmImage: 'Ubuntu-16.04'}
       steps:
       - checkout: self
-        submodules: false
+        submodules: ${{ coalesce(parameters.submodules, true) }}
       - task: UsePythonVersion@0
         displayName: setup python3.7
         inputs:
@@ -80,9 +79,6 @@ jobs:
   - job: publish
     dependsOn: ${{ parameters.targets }}
     condition: succeeded()
-
-    checkout: self
-    submodules: ${{ coalesce(parameters.submodules, true) }}
 
     pool:
       vmImage: 'Ubuntu-16.04'
