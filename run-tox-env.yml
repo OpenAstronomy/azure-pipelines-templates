@@ -70,7 +70,8 @@ jobs:
           - bash: |
               echo "##vso[task.prependpath]$CONDA/bin"
               conda create --yes --quiet --name myEnvironment python=${{ variables.python }} pip
-              source activate myEnvironment
+              conda init bash
+              conda activate myEnvironment
             displayName: Create conda environemnt
 
           - script: python -m pip install --upgrade tox-conda
