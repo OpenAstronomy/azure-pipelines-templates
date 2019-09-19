@@ -70,12 +70,13 @@ jobs:
             displayName: Starting Xvfb
 
         - ${{ if contains(env_pair.value, 'conda') }}:
-
-          - script: |
-              echo "##vso[task.prependpath]$CONDA/bin"
-              conda create --yes --quiet --name myEnvironment
-              ${{ variables.conda_prefix }}activate myEnvironment
-              conda install --yes --quiet --name myEnvironment python=${{ variables.python }} pip
+          - task: CondaEnvironment@1
+            inputs:
+              createCustomEnvironment: true
+              environmentName: 'testenv'
+              packageSpecs: 'python=${{ variables.python }} pip'
+              updateConda: true
+              cleanEnvironment: true
             displayName: Create conda environemnt
 
 
