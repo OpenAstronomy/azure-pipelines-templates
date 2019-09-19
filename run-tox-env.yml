@@ -66,8 +66,13 @@ jobs:
       - script: python -m pip install --upgrade tox
         displayName: Install tox
 
-      - script: tox -e ${{ parameters.tox }} --junitxml=junit/test-results.xml --cov-report=xml
-        displayName: Running tox
+      - ${{ if contains(env_pair.value, ' -- ') }}:
+        - script: tox -e ${{ env_pair.value }} --junitxml=junit/test-results.xml --cov-report=xml
+          displayName: Running tox
+      - ${{ if not(contains(env_pair.value, ' -- ')) }}:
+        - script: tox -e ${{ env_pair.value }} -- --junitxml=junit/test-results.xml --cov-report=xml
+          displayName: Running tox
+
         # env:
         #   DISPLAY: :99.0
 
