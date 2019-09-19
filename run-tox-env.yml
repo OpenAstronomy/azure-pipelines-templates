@@ -5,90 +5,91 @@ parameters:
 jobs:
 - ${{ each env in parameters.envs }}:
   - ${{ each env_pair in env }}:
+    - ${{ if or(eq(env_pair.key, 'linux'), eq(env_pair.key, 'macosx'), eq(env_pair.key, 'windows')) }}:
 
-    - job: ${{ coalesce(env_pair.value['name'], variables['Agent.Id']) }}
-      variables:
-        friendly_name: '${{ env_pair.value }} [${{ env_pair.key }}]'
-        ${{ if startsWith(env_pair.value, 'py27') }}:
-          python: '2.7'
-        ${{ if startsWith(env_pair.value, 'py36') }}:
-          python: '3.6'
-        ${{ if startsWith(env_pair.value, 'py37') }}:
-          python: '3.7'
-        ${{ if not(startsWith(env_pair.value, 'py')) }}:
-          python: '3.x'
+      - job: ${{ coalesce(env['name'], variables['Agent.Id']) }}
+        variables:
+          friendly_name: '${{ env_pair.value }} [${{ env_pair.key }}]'
+          ${{ if startsWith(env_pair.value, 'py27') }}:
+            python: '2.7'
+          ${{ if startsWith(env_pair.value, 'py36') }}:
+            python: '3.6'
+          ${{ if startsWith(env_pair.value, 'py37') }}:
+            python: '3.7'
+          ${{ if not(startsWith(env_pair.value, 'py')) }}:
+            python: '3.x'
 
-      displayName: ${{ variables.friendly_name }}
+        displayName: ${{ variables.friendly_name }}
 
-      pool:
-        ${{ if eq(env_pair.key, 'macosx') }}:
-          vmImage: macOS 10.13
-        ${{ if eq(env_pair.key, 'linux') }}:
-          vmImage: Ubuntu 16.04
-        ${{ if eq(env_pair.key, 'windows') }}:
-          vmImage: vs2017-win2016
+        pool:
+          ${{ if eq(env_pair.key, 'macosx') }}:
+            vmImage: macOS 10.13
+          ${{ if eq(env_pair.key, 'linux') }}:
+            vmImage: Ubuntu 16.04
+          ${{ if eq(env_pair.key, 'windows') }}:
+            vmImage: vs2017-win2016
 
-      steps:
-      - checkout: self
-        submodules: ${{ coalesce(parameters.submodules, true) }}
+        steps:
+        - checkout: self
+          submodules: ${{ coalesce(parameters.submodules, true) }}
 
-      - ${{ each tool_pair in parameters.libraries }}:
-        - ${{ each library in tool_pair.value }}:
-          - ${{ if and(eq(tool_pair.key, 'brew'), eq(env_pair.key, 'macosx')) }}:
-            - script: brew install ${{ library }}
-              displayName: Installing ${{ library }} with brew
+        - ${{ each tool_pair in parameters.libraries }}:
+          - ${{ each library in tool_pair.value }}:
+            - ${{ if and(eq(tool_pair.key, 'brew'), eq(env_pair.key, 'macosx')) }}:
+              - script: brew install ${{ library }}
+                displayName: Installing ${{ library }} with brew
 
-          - ${{ if and(eq(tool_pair.key, 'apt'), eq(env_pair.key, 'linux')) }}:
-            - script: sudo apt-get install -y ${{ library }}
-              displayName: Installing ${{ library }} with apt
+            - ${{ if and(eq(tool_pair.key, 'apt'), eq(env_pair.key, 'linux')) }}:
+              - script: sudo apt-get install -y ${{ library }}
+                displayName: Installing ${{ library }} with apt
 
-          - ${{ if and(eq(tool_pair.key, 'choco'), eq(env_pair.key, 'windows')) }}:
-            - script: choco install ${{ library }}
-              displayName: Installing ${{ library }} with choco
+            - ${{ if and(eq(tool_pair.key, 'choco'), eq(env_pair.key, 'windows')) }}:
+              - script: choco install ${{ library }}
+                displayName: Installing ${{ library }} with choco
 
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: ${{ variables['python'] }}
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: ${{ variables['python'] }}
 
-      - ${{ if and(eq(parameters.xvfb, 'true'), eq(env_pair.key, 'linux')) }}:
-        - bash: |
-            /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid \
-                                    --make-pidfile --background --exec /usr/bin/Xvfb \
-                                    -- :99 -screen 0 1920x1200x24 -ac \
-                                    +extension GLX +render -noreset
-          displayName: Starting Xvfb
+        - ${{ if and(eq(parameters.xvfb, 'true'), eq(env_pair.key, 'linux')) }}:
+          - bash: |
+              /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid \
+                                      --make-pidfile --background --exec /usr/bin/Xvfb \
+                                      -- :99 -screen 0 1920x1200x24 -ac \
+                                      +extension GLX +render -noreset
+            displayName: Starting Xvfb
 
-      - ${{ if contains(env_pair.value, 'conda') }}:
+        - ${{ if contains(env_pair.value, 'conda') }}:
 
-        - bash: |
-            echo "##vso[task.prependpath]$CONDA/bin"
-            conda create --yes --quiet --name myEnvironment python=${{ variables.python }} pip
-            source activate myEnvironment
-          displayName: Create conda environemnt
+          - bash: |
+              echo "##vso[task.prependpath]$CONDA/bin"
+              conda create --yes --quiet --name myEnvironment python=${{ variables.python }} pip
+              source activate myEnvironment
+            displayName: Create conda environemnt
 
-        - script: python -m pip install --upgrade tox-conda
-          displayName: install tox-conda
+          - script: python -m pip install --upgrade tox-conda
+            displayName: install tox-conda
 
-      - script: python -m pip install --upgrade tox
-        displayName: Install tox
+        - script: python -m pip install --upgrade tox
+          displayName: Install tox
 
-      - script: tox -e ${{ env_pair.value }} -- --junitxml=junit/test-results.xml --cov-report=xml ${{ env_pair.value['posargs'] }}
-        displayName: Running tox
-        ${{ if and(parameters.xvfb, eq(env_pair.key, 'linux')) }}:
-          env:
-            DISPLAY: :99.0
+        - script: tox -e ${{ env_pair.value }} -- --junitxml=junit/test-results.xml --cov-report=xml ${{ env['posargs'] }}
+          displayName: Running tox
+          ${{ if and(parameters.xvfb, eq(env_pair.key, 'linux')) }}:
+            env:
+              DISPLAY: :99.0
 
-      - script: |
-          python -m pip install --upgrade codecov
-          python -m codecov --name ${{ variables.friendly_name }}
-        displayName: Running codecov
-        condition: succeededOrFailed()
+        - script: |
+            python -m pip install --upgrade codecov
+            python -m codecov --name ${{ variables.friendly_name }}
+          displayName: Running codecov
+          condition: succeededOrFailed()
 
-      - task: PublishTestResults@2
-        condition: succeededOrFailed()
-        inputs:
-          testResultsFiles: '**/test-*.xml'
-          testRunTitle: 'Publish test results for ${{ variables.friendly_name }}'
+        - task: PublishTestResults@2
+          condition: succeededOrFailed()
+          inputs:
+            testResultsFiles: '**/test-*.xml'
+            testRunTitle: 'Publish test results for ${{ variables.friendly_name }}'
 
   # - ${{ if contains(env_pair.value, 'online') }}:
   #   - task: PublishCodeCoverageResults@1
