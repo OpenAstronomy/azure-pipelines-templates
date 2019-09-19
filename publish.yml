@@ -99,12 +99,12 @@ jobs:
     - task: TwineAuthenticate@1
       inputs:
         pythonUploadServiceConnection: ${{ parameters.pypi_connection_name}}
-    - script:  'python -m twine upload -r ${{ coalesce(parameters.pypi_endpoint_name, parameters.pypi_connection_name) }} --config-file $(PYPIRC_PATH) "wheelhouse/*"'}
+    - script:  'python -m twine upload -r ${{ coalesce(parameters.pypi_endpoint_name, parameters.pypi_connection_name) }} --config-file $(PYPIRC_PATH) "wheelhouse/*"'
       displayName: "upload sdist and wheels to PyPI"
 
     ${{ if parameters.artifact_feed }}:
     - task: TwineAuthenticate@1
       inputs:
         artifactFeeds: ${{ parameters.artifact_feed}}
-    - script:  'python -m twine upload -r ${{ parameters.artifact_feed }} --config-file $(PYPIRC_PATH) "wheelhouse/*"'}
+    - script:  'python -m twine upload -r ${{ parameters.artifact_feed }} --config-file $(PYPIRC_PATH) "wheelhouse/*"'
       displayName: "upload sdist and wheels to Artifacts feed"
