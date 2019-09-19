@@ -96,6 +96,8 @@ jobs:
             python -m codecov --name "${{ variables.friendly_name }}"
           displayName: Running codecov
           condition: succeededOrFailed()
+          env:
+            CODECOV_TOKEN: $(CODECOV_TOKEN)
 
         - task: PublishTestResults@2
           condition: succeededOrFailed()
