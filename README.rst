@@ -84,6 +84,28 @@ PEP-518 compatible in order to use this.
 Configuring the PyPI service connection
 ---------------------------------------
 
+If you plan to use this template to upload releases to PyPI, you will need to
+first set up a PyPI service connection in Azure. To do this, go to the Azure
+configuration for the repository where you want to use the templates. Then
+click on **Project Settings** (in the bottom left as of 2019-09-18), then go
+to the **Service connections** section in the settings.
+
+Select **New Service Connection**, then **Python Package Upload**, and enter
+the following information:
+
+===================================== ========
+**Connection Name:**                  a name for the connection, with no spaces, e.g. ``pypi_endpoint``
+
+**Python repository url for upload:** this should be https://upload.pypi.org/legacy/ if you want to push the releases to the main PyPI server. Note that you can also use https://test.pypi.org/legacy/ if you want to test out the process using the Test PyPI server. Be sure to use https://, and include the '/' at the end of the URL since twine will otherwise fail.
+
+**EndpointName**:                     for simplicity, you can set this to be the same as the connection name unless you have a good reason not to.
+
+**Username**:                         this should be either your PyPI (or Test PyPI) username, or ``__token__`` if you want to use token authentication (note that in the latter case you should make sure the 'Username and Password' option is selected, **not** 'Authentication token'!).
+
+**Password:**                         this should be either your PyPI (or Test PyPI) password, or the token if you want to use token authentication.
+===================================== ========
+
+If you want to use token authentication, you can create a token in your PyPI (or Test PyPI) settings.
 
 Usage and options
 -----------------
@@ -95,15 +117,16 @@ To make use of this template, add the following to the ``azure-pipelines.yml`` f
     jobs:
     - template: publish@OpenAstronomy
       parameters:
-        pypi_remote: 'test'
+        pypi_remote: 'pypi_endpoint'
+        external_feed: 'pypi_endpoint'
         targets:
         - sdist
         - wheels_linux
         - wheels_macosx
         - wheels_windows
 
-``pypi_remote`` should be set to the name of the PyPI service connection you set
-up above, and ``targets`` should be set to a list of builds you want to generate
+``pypi_remote`` should be set to the **EndpointName** you set above, and
+``external_feed`` to the **Connection Name**. ``targets`` should be set to a list of builds you want to generate
 - the four options are shown in the example above (wheels for the three main
 platforms and a source distribution) but you can choose to only build some of
 these if you want. The initial ``if`` statement ensures that this process is only
