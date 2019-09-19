@@ -66,15 +66,22 @@ jobs:
             displayName: Starting Xvfb
 
         - ${{ if contains(env_pair.value, 'conda') }}:
-          - task: CondaEnvironment@1
-            inputs:
-              createCustomEnvironment: true
-              environmentName: 'testenv'
-              packageSpecs: 'python=${{ variables.python }} pip'
-              updateConda: true
-              cleanEnvironment: true
-            displayName: Create conda environemnt
+          - ${{ if not(eq(env_pair.key, 'linux')) }}:
+            - task: CondaEnvironment@1
+              inputs:
+                createCustomEnvironment: true
+                environmentName: 'testenv'
+                packageSpecs: 'python=${{ variables.python }} pip'
+                updateConda: true
+                cleanEnvironment: true
+              displayName: Create conda environemnt
 
+          - ${{ if eq(env_pair.key, 'linux') }}:
+            - script: |
+                echo "##vso[task.prependpath]$CONDA/bin"
+                conda create --yes --quiet --name testenv
+                source activate myEnvironment
+                conda install --yes --quiet --name testenv python=${{ variables.python }} pip
 
           - script: python -m pip install --upgrade tox-conda
             displayName: install tox-conda
