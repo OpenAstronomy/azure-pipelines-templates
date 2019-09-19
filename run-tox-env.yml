@@ -69,13 +69,11 @@ jobs:
 
           - script: |
               echo "##vso[task.prependpath]$CONDA/bin"
-              conda create --yes --quiet --name myEnvironment python=${{ variables.python }} pip
-              conda init
+              conda create --yes --quiet --name myEnvironment
+              source activate myEnvironment
+              conda install --yes --quiet --name myEnvironment python=${{ variables.python }} pip
             displayName: Create conda environemnt
 
-          - script: |
-              conda activate myEnvironment
-            displayName: Activate conda environemnt
 
           - script: python -m pip install --upgrade tox-conda
             displayName: install tox-conda
