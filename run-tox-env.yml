@@ -16,7 +16,7 @@ jobs:
         ${{ if startsWith(env_pair.value, 'py37') }}:
           python_version: '3.7'
 
-      displayName: ${{ friendly_name }}
+      displayName: $(friendly_name)
 
       pool:
         ${{ if eq(env_pair.key, 'macosx') }}:
@@ -46,7 +46,7 @@ jobs:
 
       - task: UsePythonVersion@0
         inputs:
-            versionSpec: ${{ python_version }}
+            versionSpec: $(python_version)
 
       - ${{ if and(eq(parameters.xvfb, 'true'), eq(env_pair.key, 'linux')) }}:
         - bash: |
@@ -60,7 +60,7 @@ jobs:
 
         - script: |
             echo "##vso[task.prependpath]$CONDA/bin"
-            conda create --yes --quiet --name myEnvironment python=${{ python_version }} pip
+            conda create --yes --quiet --name myEnvironment python=$(python_version) pip
             conda activate myEnvironment
           displayName: Create conda environemnt
 
@@ -78,7 +78,7 @@ jobs:
 
       - script: |
           python -m pip install --upgrade codecov
-          python -m codecov --name ${{ friendly_name }}
+          python -m codecov --name $(friendly_name)
         displayName: Running codecov
         condition: succeededOrFailed()
 
@@ -86,7 +86,7 @@ jobs:
         condition: succeededOrFailed()
         inputs:
           testResultsFiles: '**/test-*.xml'
-          testRunTitle: 'Publish test results for ${{ friendly_name }}'
+          testRunTitle: 'Publish test results for $(friendly_name)'
 
   # - ${{ if contains(env_pair.value, 'online') }}:
   #   - task: PublishCodeCoverageResults@1
