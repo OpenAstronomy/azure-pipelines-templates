@@ -72,7 +72,7 @@ jobs:
 
       - script: tox -e ${{ env_pair.value }} -- --junitxml=junit/test-results.xml --cov-report=xml ${{ env_pair.value['posargs'] }}
         displayName: Running tox
-        ${{ if and(parameters.xvfb, eq(variables['Agent.OS'], 'Linux')) }}:
+        ${{ if and(parameters.xvfb, eq(env_pair.key, 'linux')) }}:
           env:
             DISPLAY: :99.0
 
