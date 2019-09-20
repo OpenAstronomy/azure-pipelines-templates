@@ -27,6 +27,7 @@ jobs:
       steps:
         - checkout: self
           submodules: ${{ coalesce(parameters.submodules, true) }}
+          fetchDepth: 999999999
         - ${{ if not(eq(target, 'wheels_windows')) }}:
           - task: UsePythonVersion@0
             inputs:
@@ -53,6 +54,7 @@ jobs:
       steps:
       - checkout: self
         submodules: ${{ coalesce(parameters.submodules, true) }}
+        fetchDepth: 999999999
       - task: UsePythonVersion@0
         displayName: setup python3.7
         inputs:
