@@ -230,6 +230,29 @@ In the above example, we have disabled coverage testing, posargs, and any
 libraries for the ``pep8`` job, and overridden ``libraries`` so that ``graphviz``
 gets installed on Windows.
 
+
+Naming Jobs
+-----------
+
+Optionally you can name an env, which is useful if you want to refer to that job
+later in your pipeline, e.g. in the publish template's ``dependsOn`` parameter.
+
+.. code:: yaml
+
+    jobs:
+    - template: run-tox-env.yml@OpenAstronomy
+      parameters:
+        envs:
+        - linux: py36-test
+          name: py36_test
+
+
+Note, that job names in Azure pipelines can only contain `A-Z, a-z, 0-9, and
+underscore
+<https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema?view=azure-devops&tabs=schema#job>`__.
+Which is why they are not automatically set from the tox env names, as they
+frequently have hyphens in.
+
 Python package release template
 ===============================
 
