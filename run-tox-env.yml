@@ -43,6 +43,7 @@ jobs:
             vmImage: vs2017-win2016
 
         steps:
+        - script: 'echo ${{ variables.xvfb }}'
         - checkout: self
           submodules: ${{ coalesce(parameters.submodules, true) }}
 
