@@ -65,7 +65,7 @@ jobs:
           inputs:
             versionSpec: ${{ variables['python'] }}
 
-        - ${{ if variables.xvfb }}:
+        - ${{ if eq(variables.xvfb, 'true') }}:
           - bash: |
               /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid \
                                       --make-pidfile --background --exec /usr/bin/Xvfb \
@@ -102,7 +102,7 @@ jobs:
 
         - script: tox -e ${{ env_pair.value }} -- --junitxml=junit/test-results.xml --cov-report=xml ${{ variables['posargs'] }}
           displayName: Running tox
-          ${{ if variables.xvfb }}:
+          ${{ if eq(variables.xvfb, 'true') }}:
             env:
               DISPLAY: :99.0
 
