@@ -73,7 +73,7 @@ To use this template, you will need to add the following section to your
 
 Where ``<os>`` is the operating system to test on, and ``<tox env>`` is the name
 of a tox environment. The operating system should be one of ``linux``,
-``macosx``, or ``windows``. An example might be:
+``macos``, or ``windows``. An example might be:
 
 .. code:: yaml
 
@@ -82,7 +82,7 @@ of a tox environment. The operating system should be one of ``linux``,
       parameters:
         envs:
         - linux: pep8
-        - macosx: py37-test
+        - macos: py37-test
         - windows: py36-docs
 
 In many cases, this may be enough, but there are additional options you can
@@ -111,7 +111,7 @@ Non-Python dependencies
 
 To make sure that non-Python dependencies are installed before the tox environments
 are run, use the ``libraries`` parameter. This can have sections for the ``apt``,
-``brew``, and ``choco`` tools which are used for ``linux``, ``macosx``, and ``windows``
+``brew``, and ``choco`` tools which are used for ``linux``, ``macos``, and ``windows``
 respectively, and each of these sections should contain a list of package names to
 install with these tools, e.g:
 
@@ -173,7 +173,7 @@ file, you can specify positional arguments to pass to tox for each job using the
       parameters:
         envs:
         - linux: pep8
-        - macosx: py37-test
+        - macos: py37-test
           posargs: -n=4
         - windows: py36-docs
 
@@ -196,7 +196,7 @@ instead of or as well as globally, and take precedence over global options:
         - linux: pep8
           coverage: false
           libraries: {}
-        - macosx: py37-test
+        - macos: py37-test
         - windows: py36-docs
           libraries:
             choco:
@@ -253,7 +253,7 @@ To make use of this template, add the following to the ``azure-pipelines.yml`` f
         targets:
         - sdist
         - wheels_linux
-        - wheels_macosx
+        - wheels_macos
         - wheels_windows
 
 ``pypi_connection_name`` should be set to the **Connection Name** you set above.

@@ -6,7 +6,7 @@ parameters:
 jobs:
 - ${{ each env in parameters.envs }}:
   - ${{ each env_pair in env }}:
-    - ${{ if or(eq(env_pair.key, 'linux'), eq(env_pair.key, 'macosx'), eq(env_pair.key, 'windows')) }}:
+    - ${{ if or(eq(env_pair.key, 'linux'), eq(env_pair.key, 'macos'), eq(env_pair.key, 'windows')) }}:
 
       - job: ${{ coalesce(env['name'], variables['Agent.Id']) }}
         variables:
@@ -33,7 +33,7 @@ jobs:
         displayName: ${{ variables.friendly_name }}
 
         pool:
-          ${{ if eq(env_pair.key, 'macosx') }}:
+          ${{ if eq(env_pair.key, 'macos') }}:
             vmImage: macOS 10.13
           ${{ if eq(env_pair.key, 'linux') }}:
             vmImage: Ubuntu 16.04
@@ -46,7 +46,7 @@ jobs:
 
         - ${{ each tool_pair in coalesce(env['libraries'], parameters.libraries) }}:
           - ${{ each library in tool_pair.value }}:
-            - ${{ if and(eq(tool_pair.key, 'brew'), eq(env_pair.key, 'macosx')) }}:
+            - ${{ if and(eq(tool_pair.key, 'brew'), eq(env_pair.key, 'macos')) }}:
               - script: brew install ${{ library }}
                 displayName: Installing ${{ library }} with brew
 
@@ -71,7 +71,7 @@ jobs:
             displayName: Starting Xvfb
 
         - ${{ if contains(env_pair.value, 'conda') }}:
-          - ${{ if eq(env_pair.key, 'macosx') }}:
+          - ${{ if eq(env_pair.key, 'macos') }}:
             - bash: echo "##vso[task.prependpath]$CONDA/bin"
               displayName: Add conda to PATH
             - bash: sudo chown -R $USER $CONDA

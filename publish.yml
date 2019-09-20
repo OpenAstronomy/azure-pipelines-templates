@@ -6,7 +6,7 @@ parameters:
 jobs:
 - ${{ each target in parameters.targets }}:
 
-  - ${{ if or(eq(target, 'wheels_macosx'), eq(target, 'wheels_linux'), eq(target, 'wheels_windows')) }}:
+  - ${{ if or(eq(target, 'wheels_macos'), eq(target, 'wheels_linux'), eq(target, 'wheels_windows')) }}:
 
     - job: ${{ target }}
       dependsOn: ${{ parameters.dependsOn }}
@@ -17,7 +17,7 @@ jobs:
         CIBW_TEST_EXTRAS: ${{ parameters.test_extras }}
 
       pool:
-        ${{ if eq(target, 'wheels_macosx') }}:
+        ${{ if eq(target, 'wheels_macos') }}:
           vmImage: macOS 10.13
         ${{ if eq(target, 'wheels_linux') }}:
           vmImage: Ubuntu 16.04
