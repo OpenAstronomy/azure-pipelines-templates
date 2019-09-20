@@ -13,7 +13,6 @@ jobs:
           friendly_name: '${{ env_pair.value }} [${{ env_pair.key }}]'
           posargs: ${{ coalesce(env['posargs'], parameters.posargs) }}
           xvfb: ${{ and(coalesce(env['xvfb'], parameters.xvfb, false), eq(env_pair.key, 'linux')) }}
-          python: '3.x'
           ${{ if startsWith(env_pair.value, 'py27') }}:
             python: '2.7'
           ${{ if startsWith(env_pair.value, 'py34') }}:
@@ -61,7 +60,7 @@ jobs:
 
         - task: UsePythonVersion@0
           inputs:
-            versionSpec: ${{ variables['python'] }}
+            versionSpec: ${{ coalesce(variables['python'], '3.x') }}
 
         - ${{ if eq(variables.xvfb, 'true') }}:
           - bash: |
