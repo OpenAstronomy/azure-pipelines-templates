@@ -241,7 +241,7 @@ To make use of this template, add the following to the ``azure-pipelines.yml`` f
 .. code:: yaml
 
     jobs:
-    - template: publish@OpenAstronomy
+    - template: publish.yml@OpenAstronomy
       parameters:
         pypi_connection_name: 'pypi_endpoint'
         targets:
@@ -264,7 +264,7 @@ the following parameters:
 .. code:: yaml
 
     jobs:
-    - template: publish@OpenAstronomy
+    - template: publish.yml@OpenAstronomy
       parameters:
         pypi_connection_name: 'pypi_endpoint'
         test_extras: "all,test"
