@@ -177,6 +177,25 @@ file, you can specify positional arguments to pass to tox for each job using the
           posargs: -n=4
         - windows: py36-docs
 
+
+Submodule Checkout
+------------------
+
+If you want to change the submodules setting to the `Checkout
+<https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema?view=azure-devops&tabs=schema#checkout>`__
+task you can set the ``submodules`` parameter. For instance:
+
+
+.. code:: yaml
+
+    jobs:
+    - template: run-tox-env.yml@OpenAstronomy
+      parameters:
+        submodules: false
+        envs:
+        - linux: pep8
+
+
 Setting or overriding options on a job by job basis
 ---------------------------------------------------
 
