@@ -199,14 +199,16 @@ task you can set the ``submodules`` parameter. For instance:
 Setting or overriding options on a job by job basis
 ---------------------------------------------------
 
-The ``coverage`` and ``libraries`` parameters can be specified on a job by job basis
-instead of or as well as globally, and take precedence over global options:
+The ``coverage``, ``libraries``, ``posargs`` and ``xvfb`` parameters can be
+specified on a job by job basis instead of or as well as globally, and take
+precedence over global options:
 
 .. code:: yaml
 
     jobs:
     - template: run-tox-env.yml@OpenAstronomy
       coverage: codecov
+      posargs: '-n=4'
       libraries:
         brew:
         - fftw
@@ -215,15 +217,18 @@ instead of or as well as globally, and take precedence over global options:
         - linux: pep8
           coverage: false
           libraries: {}
+          posargs: ''
         - macos: py37-test
+        - linux: py36-test
+          xvfb: true
         - windows: py36-docs
           libraries:
             choco:
               graphviz
 
-In the above example, we have disabled coverage testing and any libaries for the
-``pep8`` job, and overriden ``libraries`` so that ``graphviz`` gets installed on
-Windows.
+In the above example, we have disabled coverage testing, posargs, and any
+libraries for the ``pep8`` job, and overridden ``libraries`` so that ``graphviz``
+gets installed on Windows.
 
 Python package release template
 ===============================
