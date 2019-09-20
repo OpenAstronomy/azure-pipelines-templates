@@ -88,7 +88,8 @@ of a tox environment. The operating system should be one of ``linux``,
 In many cases, this may be enough, but there are additional options you can
 specify, which we describe in the following sections.
 
-### Reporting coverage
+Reporting coverage
+------------------
 
 To enable coverage reporting, add a parameter ``coverage`` that is set to the
 name of the service to use:
@@ -105,7 +106,8 @@ name of the service to use:
 
 At this time, only ``codecov`` is supported.
 
-### Non-Python dependencies
+Non-Python dependencies
+-----------------------
 
 To make sure that non-Python dependencies are installed before the tox environments
 are run, use the ``libraries`` parameter. This can have sections for the ``apt``,
