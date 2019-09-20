@@ -113,7 +113,9 @@ To make sure that non-Python dependencies are installed before the tox environme
 are run, use the ``libraries`` parameter. This can have sections for the ``apt``,
 ``brew``, and ``choco`` tools which are used for ``linux``, ``macosx``, and ``windows``
 respectively, and each of these sections should contain a list of package names to
-install with these tools, e.g::
+install with these tools, e.g:
+
+.. code:: yaml
 
     jobs:
 
@@ -136,6 +138,8 @@ X virtual framebuffer
 If you want to make use of the X virtual framebuffer (Xvfb) which is typically needed
 when testing packages that open graphical windows, you can set the ``xvfb`` parameter
 to ``true``:
+
+.. code:: yaml
 
     jobs:
 
