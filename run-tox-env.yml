@@ -13,6 +13,7 @@ jobs:
           friendly_name: '${{ env_pair.value }} [${{ env_pair.key }}]'
           posargs: ${{ coalesce(env['posargs'], parameters.posargs) }}
           xvfb: ${{ and(coalesce(env['xvfb'], parameters.xvfb, false), eq(env_pair.key, 'linux')) }}
+          python: '3.x'
           ${{ if startsWith(env_pair.value, 'py27') }}:
             python: '2.7'
           ${{ if startsWith(env_pair.value, 'py34') }}:
@@ -25,8 +26,6 @@ jobs:
             python: '3.7'
           ${{ if startsWith(env_pair.value, 'py38') }}:
             python: '3.8'
-          ${{ if not(startsWith(env_pair.value, 'py')) }}:
-            python: '3.x'
           ${{ if eq(env_pair.key, 'windows') }}:
             source: "call"
           ${{ if not(eq(env_pair.key, 'windows')) }}:
@@ -43,7 +42,6 @@ jobs:
             vmImage: vs2017-win2016
 
         steps:
-        - script: 'echo ${{ variables.xvfb }}'
         - checkout: self
           submodules: ${{ coalesce(parameters.submodules, true) }}
 
