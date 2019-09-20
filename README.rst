@@ -9,6 +9,10 @@ templates available - one to make it easy to map `tox
 <https://tox.readthedocs.org>`__ environments to builds on Azure Pipelines, and
 one to automate the process of releasing Python packages.
 
+The templates in this repository were inspired and adapted from `tox's
+<https://github.com/tox-dev/azure-pipelines-template>`__ and `SunPy's templates
+<https://github.com/sunpy/azure-pipelines-template>`_.
+
 Loading the templates
 =====================
 
@@ -48,31 +52,153 @@ version.
 Tox template
 ============
 
-This template borrows heavily from `tox's templates <https://github.com/tox-dev/azure-pipelines-template>`__.
+The purpose of this template is to make it easy to map `tox
+<https://tox.readthedocs.io/>`__ environments to Azure jobs. To use this
+template, your repository will need to have a ``tox.ini`` file.
 
-You must have a ``tox.ini`` and a ``azure-pipelines.yml`` file in your main repository.
-Then for each job you want to run, you have to create a entry for it within your ``azure-pipelines.yml`` file.
+Basic setup
+-----------
 
-Example
--------
+To use this template, you will need to add the following section to your
+``azure-pipelines.yml`` file:
 
 .. code:: yaml
 
     jobs:
-    - template: run-tox-env.yml@sunpy
+    - template: run-tox-env.yml@OpenAstronomy
       parameters:
-        name: Linux_37_offline
-        os: macos
-        tox: py37-offline -- -n=4
+        envs:
+        - <os>: <tox env>
+        - <os>: <tox env>
 
-This example will run the ``py37-offline`` on Linux.
-Here ``py37-offline`` is the name of a tox environment that is in the SunPy's `tox.ini`.
+Where ``<os>`` is the operating system to test on, and ``<tox env>`` is the name
+of a tox environment. The operating system should be one of ``linux``,
+``macosx``, or ``windows``. An example might be:
 
-Th parameters are:
+.. code:: yaml
 
-* ``name`` : Name of the build.
-* ``os``: The operating system to use - ``windows``, ``macos``, ``linux``.
-* ``tox`` : The name of the tox environment as well as any extra inputs to pytest.
+    jobs:
+    - template: run-tox-env.yml@OpenAstronomy
+      parameters:
+        envs:
+        - linux: pep8
+        - macosx: py37-test
+        - windows: py36-docs
+
+In many cases, this may be enough, but there are additional options you can
+specify, which we describe in the following sections.
+
+### Reporting coverage
+
+To enable coverage reporting, add a parameter ``coverage`` that is set to the
+name of the service to use:
+
+.. code:: yaml
+
+    jobs:
+
+    - template: run-tox-env.yml@OpenAstronomy
+      parameters:
+        coverage: codecov
+        envs:
+        - ...
+
+At this time, only ``codecov`` is supported.
+
+### Non-Python dependencies
+
+To make sure that non-Python dependencies are installed before the tox environments
+are run, use the ``libraries`` parameter. This can have sections for the ``apt``,
+``brew``, and ``choco`` tools which are used for ``linux``, ``macosx``, and ``windows``
+respectively, and each of these sections should contain a list of package names to
+install with these tools, e.g::
+
+    jobs:
+
+    - template: run-tox-env.yml@OpenAstronomy
+      parameters:
+        libraries:
+          apt:
+            - libopenjpeg5
+          brew:
+            - openjpeg
+        envs:
+        - ...
+
+Note that as shown above, you don't need to specify all tools, only the ones for
+which you need to install packages.
+
+X virtual framebuffer
+---------------------
+
+If you want to make use of the X virtual framebuffer (Xvfb) which is typically needed
+when testing packages that open graphical windows, you can set the ``xvfb`` parameter
+to ``true``:
+
+    jobs:
+
+    - template: run-tox-env.yml@OpenAstronomy
+      parameters:
+        xvfb: true
+        envs:
+        - ...
+
+This parameter only has an effect on Linux, and is ignored on other platforms.
+
+Conda
+-----
+
+If you want tox to be run with `tox-conda
+<https://github.com/tox-dev/tox-conda>`_, include the string ``conda`` in your
+tox environment name. This will automatically result in conda getting set up,
+and tox-conda installed.
+
+Positional arguments for tox
+----------------------------
+
+If you want to make use of the ``{posargs}`` functionality in your ``tox.ini``
+file, you can specify positional arguments to pass to tox for each job using the
+``posargs`` parameter:
+
+.. code:: yaml
+
+    jobs:
+    - template: run-tox-env.yml@OpenAstronomy
+      parameters:
+        envs:
+        - linux: pep8
+        - macosx: py37-test
+          posargs: -n=4
+        - windows: py36-docs
+
+Setting or overriding options on a job by job basis
+---------------------------------------------------
+
+The ``coverage`` and ``libraries`` parameters can be specified on a job by job basis
+instead of or as well as globally, and take precedence over global options:
+
+.. code:: yaml
+
+    jobs:
+    - template: run-tox-env.yml@OpenAstronomy
+      coverage: codecov
+      libraries:
+        brew:
+        - fftw
+      parameters:
+        envs:
+        - linux: pep8
+          coverage: false
+          libraries: {}
+        - macosx: py37-test
+        - windows: py36-docs
+          libraries:
+            choco:
+              graphviz
+
+In the above example, we have disabled coverage testing and any libaries for the
+``pep8`` job, and overriden ``libraries`` so that ``graphviz`` gets installed on
+Windows.
 
 Python package release template
 ===============================
