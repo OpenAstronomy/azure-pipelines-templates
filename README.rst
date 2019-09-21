@@ -306,10 +306,14 @@ To make use of this template, add the following to the ``azure-pipelines.yml`` f
 ``pypi_connection_name`` should be set to the **Connection Name** you set above.
 If the endpoint name you set is different from the connection name, you should
 also specify the endpoint name with the ``pypi_endpoint_name`` parameter.
-``targets`` should be set to a list of builds you want to generate - the four
-options are shown in the example above (wheels for the three main platforms and
-a source distribution) but you can choose to only build some of these if you
-want. The initial ``if`` statement ensures that this process is only
+``targets`` should be set to a list of builds you want to generate - the
+options are:
+
+* ``sdist``: source distribution
+* ``wheels_universal``: universal binary wheel for all platforms (which can be used if you have no compiled extensions)
+* ``wheels_linux``: binary wheels for Linux
+* ``wheels_macos``: binary wheels for MacOS X
+* ``wheels_windows``: binary wheels for Windows
 
 If you want to run tests on the generated packages (which we recommend), you can make use of
 the following parameters:
