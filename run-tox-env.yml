@@ -6,25 +6,33 @@ parameters:
 jobs:
 - ${{ each env in parameters.envs }}:
   - ${{ each env_pair in env }}:
-    - ${{ if or(eq(env_pair.key, 'linux'), eq(env_pair.key, 'macos'), eq(env_pair.key, 'windows')) }}:
+
+    - ${{ if or(eq(env_pair.key, 'linux32'), eq(env_pair.key, 'linux'), eq(env_pair.key, 'macos'), eq(env_pair.key, 'windows')) }}:
 
       - job: ${{ coalesce(env['name'], variables['Agent.Id']) }}
         variables:
           friendly_name: '${{ env_pair.value }} [${{ env_pair.key }}]'
           posargs: ${{ coalesce(env['posargs'], parameters.posargs) }}
           xvfb: ${{ and(coalesce(env['xvfb'], parameters.xvfb, false), eq(env_pair.key, 'linux')) }}
+          default32bit: '/opt/python/cp27-cp27m/bin/python'
           ${{ if startsWith(env_pair.value, 'py27') }}:
             python: '2.7'
+            python32bit: '/opt/python/cp27-cp27m/bin/python'
           ${{ if startsWith(env_pair.value, 'py34') }}:
             python: '3.4'
+            python32bit: '/opt/python/cp34-cp34m/bin/python'
           ${{ if startsWith(env_pair.value, 'py35') }}:
             python: '3.5'
+            python32bit: '/opt/python/cp35-cp35m/bin/python'
           ${{ if startsWith(env_pair.value, 'py36') }}:
             python: '3.6'
+            python32bit: '/opt/python/cp36-cp36m/bin/python'
           ${{ if startsWith(env_pair.value, 'py37') }}:
             python: '3.7'
+            python32bit: '/opt/python/cp37-cp37m/bin/python'
           ${{ if startsWith(env_pair.value, 'py38') }}:
             python: '3.8'
+            python32bit: '/opt/python/cp38-cp38m/bin/python'
           ${{ if eq(env_pair.key, 'windows') }}:
             source: 'call'
           ${{ if not(eq(env_pair.key, 'windows')) }}:
@@ -39,7 +47,7 @@ jobs:
         pool:
           ${{ if eq(env_pair.key, 'macos') }}:
             vmImage: macOS 10.13
-          ${{ if eq(env_pair.key, 'linux') }}:
+          ${{ if or(eq(env_pair.key, 'linux'), eq(env_pair.key, 'linux32')) }}:
             vmImage: Ubuntu 16.04
           ${{ if eq(env_pair.key, 'windows') }}:
             vmImage: vs2017-win2016
@@ -49,8 +57,13 @@ jobs:
           submodules: ${{ coalesce(parameters.submodules, true) }}
           fetchDepth: 999999999
 
+        - ${{ if eq(env_pair.key, 'linux32') }}:
+          - bash: docker run -v $PWD:/project -i --name manylinux1 -d quay.io/pypa/manylinux1_i686:latest /bin/bash
+            displayName: Start up Docker container
+
         - ${{ each tool_pair in coalesce(env['libraries'], parameters.libraries) }}:
           - ${{ each library in tool_pair.value }}:
+
             - ${{ if and(eq(tool_pair.key, 'brew'), eq(env_pair.key, 'macos')) }}:
               - script: brew install ${{ library }}
                 displayName: Installing ${{ library }} with brew
@@ -59,13 +72,18 @@ jobs:
               - script: sudo apt-get install -y ${{ library }}
                 displayName: Installing ${{ library }} with apt
 
+            - ${{ if and(eq(tool_pair.key, 'apt'), eq(env_pair.key, 'linux32')) }}:
+              - script: docker exec -i -w /project manylinux1 yum install -y ${{ library }}
+                displayName: Installing ${{ library }} with yum
+
             - ${{ if and(eq(tool_pair.key, 'choco'), eq(env_pair.key, 'windows')) }}:
               - script: choco install ${{ library }}
                 displayName: Installing ${{ library }} with choco
 
-        - task: UsePythonVersion@0
-          inputs:
-            versionSpec: ${{ coalesce(variables['python'], '3.x') }}
+        - ${{ if ne(env_pair.key, 'linux32') }}:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: ${{ coalesce(variables['python'], '3.x') }}
 
         - ${{ if eq(variables.xvfb, 'true') }}:
           - bash: |
@@ -76,6 +94,7 @@ jobs:
             displayName: Starting Xvfb
 
         - ${{ if contains(env_pair.value, 'conda') }}:
+
           - ${{ if eq(env_pair.key, 'macos') }}:
             - bash: echo "##vso[task.prependpath]$CONDA/bin"
               displayName: Add conda to PATH
@@ -99,14 +118,24 @@ jobs:
           - script: python -m pip install --upgrade tox-conda
             displayName: install tox-conda
 
-        - script: python -m pip install --upgrade tox
-          displayName: Install tox
+        - ${{ if eq(env_pair.key, 'linux32') }}:
 
-        - script: tox -e ${{ env_pair.value }} -- ${{ variables['pytest_flag'] }} ${{ variables['posargs'] }}
-          displayName: Running tox
-          ${{ if eq(variables.xvfb, 'true') }}:
-            env:
-              DISPLAY: :99.0
+          - script: docker exec -i -w /project manylinux1 ${{ coalesce(variables.python32bit, variables.default32bit) }} -m pip install --upgrade tox
+            displayName: Install tox
+
+          - script: docker exec -i -w /project manylinux1 ${{ coalesce(variables.python32bit, variables.default32bit) }} -m tox -e ${{ env_pair.value }} -- ${{ variables['pytest_flag'] }} ${{ variables['posargs'] }}
+            displayName: Running tox
+
+        - ${{ if ne(env_pair.key, 'linux32') }}:
+
+          - script: python -m pip install --upgrade tox
+            displayName: Install tox
+
+          - script: tox -e ${{ env_pair.value }} -- ${{ variables['pytest_flag'] }} ${{ variables['posargs'] }}
+            displayName: Running tox
+            ${{ if eq(variables.xvfb, 'true') }}:
+              env:
+                DISPLAY: :99.0
 
         - ${{ if eq(coalesce(env['coverage'], parameters.coverage), 'codecov') }}:
           - script: |

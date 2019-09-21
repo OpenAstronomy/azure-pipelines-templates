@@ -72,7 +72,7 @@ To use this template, you will need to add the following section to your
         - <os>: <tox env>
 
 Where ``<os>`` is the operating system to test on, and ``<tox env>`` is the name
-of a tox environment. The operating system should be one of ``linux``,
+of a tox environment. The operating system should be one of ``linux``, ``linux32``,
 ``macos``, or ``windows``. An example might be:
 
 .. code:: yaml
@@ -109,11 +109,12 @@ At this time, only ``codecov`` is supported.
 Non-Python dependencies
 -----------------------
 
-To make sure that non-Python dependencies are installed before the tox environments
-are run, use the ``libraries`` parameter. This can have sections for the ``apt``,
-``brew``, and ``choco`` tools which are used for ``linux``, ``macos``, and ``windows``
-respectively, and each of these sections should contain a list of package names to
-install with these tools, e.g:
+To make sure that non-Python dependencies are installed before the tox
+environments are run, use the ``libraries`` parameter. This can have sections
+for the ``apt``, ``yum``, ``brew``, and ``choco`` tools which are used for
+``linux``, ``linux32``, ``macos``, and ``windows`` respectively, and each of
+these sections should contain a list of package names to install with these
+tools, e.g:
 
 .. code:: yaml
 
@@ -230,7 +231,6 @@ In the above example, we have disabled coverage testing, posargs, and any
 libraries for the ``pep8`` job, and overridden ``libraries`` so that ``graphviz``
 gets installed on Windows.
 
-
 Naming Jobs
 -----------
 
@@ -252,6 +252,13 @@ underscore
 <https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema?view=azure-devops&tabs=schema#job>`__.
 Which is why they are not automatically set from the tox env names, as they
 frequently have hyphens in.
+
+Linux 32-bit
+------------
+
+When testing on 32-bit linux (i.e. with the OS set to ``linux32``, note that the
+Xvfb and conda options will not work. In addition, when using the ``libraries``
+parameter, you should use ``yum`` rather than ``apt`` as the tool name.
 
 Python package release template
 ===============================
