@@ -26,13 +26,13 @@ jobs:
           ${{ if startsWith(env_pair.value, 'py38') }}:
             python: '3.8'
           ${{ if eq(env_pair.key, 'windows') }}:
-            source: "call"
+            source: 'call'
           ${{ if not(eq(env_pair.key, 'windows')) }}:
-            source: "source"
+            source: 'source'
           ${{ if eq(env_pair.key, 'windows') }}:
-            pytest_flag: "--junitxml=junit\test-results.xml --cov-report=xml:$(System.DefaultWorkingDirectory)\coverage.xml"
+            pytest_flag: '--junitxml=junit\test-results.xml --cov-report=xml:$(System.DefaultWorkingDirectory)\coverage.xml'
           ${{ if not(eq(env_pair.key, 'windows')) }}:
-            pytest_flag: "--junitxml=junit/test-results.xml --cov-report=xml:$(System.DefaultWorkingDirectory)/coverage.xml"
+            pytest_flag: '--junitxml=junit/test-results.xml --cov-report=xml:$(System.DefaultWorkingDirectory)/coverage.xml'
 
         displayName: ${{ variables.friendly_name }}
 
