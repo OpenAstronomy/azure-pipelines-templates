@@ -43,6 +43,7 @@ jobs:
         steps:
         - checkout: self
           submodules: ${{ coalesce(parameters.submodules, true) }}
+          fetchDepth: 999999999
 
         - ${{ each tool_pair in coalesce(env['libraries'], parameters.libraries) }}:
           - ${{ each library in tool_pair.value }}:
