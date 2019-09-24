@@ -29,6 +29,10 @@ jobs:
             source: "call"
           ${{ if not(eq(env_pair.key, 'windows')) }}:
             source: "source"
+          ${{ if eq(env_pair.key, 'windows') }}:
+            pytest_flag: "--junitxml=junit\test-results.xml --cov-report=xml:$(System.DefaultWorkingDirectory)\coverage.xml"
+          ${{ if not(eq(env_pair.key, 'windows')) }}:
+            pytest_flag: "--junitxml=junit/test-results.xml --cov-report=xml:$(System.DefaultWorkingDirectory)/coverage.xml"
 
         displayName: ${{ variables.friendly_name }}
 
@@ -98,7 +102,7 @@ jobs:
         - script: python -m pip install --upgrade tox
           displayName: Install tox
 
-        - script: tox -e ${{ env_pair.value }} -- --junitxml=junit/test-results.xml --cov-report=xml:$(System.DefaultWorkingDirectory)/coverage.xml ${{ variables['posargs'] }}
+        - script: tox -e ${{ env_pair.value }} -- ${{ variables['pytest_flag'] }} ${{ variables['posargs'] }}
           displayName: Running tox
           ${{ if eq(variables.xvfb, 'true') }}:
             env:
@@ -119,10 +123,9 @@ jobs:
             testResultsFiles: '**/test-*.xml'
             testRunTitle: 'Publish test results for ${{ variables.friendly_name }}'
 
-  # - ${{ if contains(env_pair.value, 'online') }}:
-  #   - task: PublishCodeCoverageResults@1
-  #     condition: succeededOrFailed()
-  #     inputs:
-  #       codeCoverageTool: Cobertura
-  #       summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
-  #       reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+        - ${{ if eq(coalesce(env['coverage'], parameters.coverage), 'azure') }}:
+          - task: PublishCodeCoverageResults@1
+            condition: succeededOrFailed()
+            inputs:
+              codeCoverageTool: Cobertura
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage.xml'
