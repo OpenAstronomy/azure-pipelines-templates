@@ -80,10 +80,9 @@ jobs:
               - script: choco install ${{ library }}
                 displayName: Installing ${{ library }} with choco
 
-        - ${{ if ne(env_pair.key, 'linux32') }}:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: ${{ coalesce(variables['python'], '3.x') }}
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: ${{ coalesce(variables['python'], '3.x') }}
 
         - ${{ if eq(variables.xvfb, 'true') }}:
           - bash: |
