@@ -58,7 +58,7 @@ jobs:
           fetchDepth: 999999999
 
         - ${{ if eq(env_pair.key, 'linux32') }}:
-          - bash: docker run -v $PWD:/project -i --name manylinux1 -d quay.io/pypa/manylinux1_i686:latest /bin/bash
+          - bash: docker run -v $PWD:/project -i --name manylinux2010 -d quay.io/pypa/manylinux2010_i686:latest /bin/bash
             displayName: Start up Docker container
 
         - ${{ each tool_pair in coalesce(env['libraries'], parameters.libraries) }}:
@@ -73,7 +73,7 @@ jobs:
                 displayName: Installing ${{ library }} with apt
 
             - ${{ if and(eq(tool_pair.key, 'yum'), eq(env_pair.key, 'linux32')) }}:
-              - script: docker exec -i -w /project manylinux1 linux32 yum install -y ${{ library }}
+              - script: docker exec -i -w /project manylinux2010 linux32 yum install -y ${{ library }}
                 displayName: Installing ${{ library }} with yum
 
             - ${{ if and(eq(tool_pair.key, 'choco'), eq(env_pair.key, 'windows')) }}:
@@ -119,10 +119,10 @@ jobs:
 
         - ${{ if eq(env_pair.key, 'linux32') }}:
 
-          - script: docker exec -i -w /project manylinux1 linux32 ${{ coalesce(variables.python32bit, variables.default32bit) }} -m pip install --upgrade tox
+          - script: docker exec -i -w /project manylinux2010 linux32 ${{ coalesce(variables.python32bit, variables.default32bit) }} -m pip install --upgrade tox
             displayName: Install tox
 
-          - script: docker exec -i -w /project manylinux1 linux32 ${{ coalesce(variables.python32bit, variables.default32bit) }} -m tox -e ${{ env_pair.value }} -- ${{ variables['pytest_flag'] }} ${{ variables['posargs'] }}
+          - script: docker exec -i -w /project manylinux2010 linux32 ${{ coalesce(variables.python32bit, variables.default32bit) }} -m tox -e ${{ env_pair.value }} -- ${{ variables['pytest_flag'] }} ${{ variables['posargs'] }}
             displayName: Running tox
 
         - ${{ if ne(env_pair.key, 'linux32') }}:
