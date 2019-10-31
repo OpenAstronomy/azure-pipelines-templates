@@ -72,7 +72,7 @@ jobs:
               - script: sudo apt-get install -y ${{ library }}
                 displayName: Installing ${{ library }} with apt
 
-            - ${{ if and(eq(tool_pair.key, 'apt'), eq(env_pair.key, 'linux32')) }}:
+            - ${{ if and(eq(tool_pair.key, 'yum'), eq(env_pair.key, 'linux32')) }}:
               - script: docker exec -i -w /project manylinux1 yum install -y ${{ library }}
                 displayName: Installing ${{ library }} with yum
 
