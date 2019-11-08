@@ -14,6 +14,7 @@ jobs:
           friendly_name: '${{ env_pair.value }} [${{ env_pair.key }}]'
           posargs: ${{ coalesce(env['posargs'], parameters.posargs) }}
           xvfb: ${{ and(coalesce(env['xvfb'], parameters.xvfb, false), eq(env_pair.key, 'linux')) }}
+          mesaopengl: ${{ and(coalesce(env['mesaopengl'], parameters.mesaopengl, false), eq(env_pair.key, 'windows')) }}
           default32bit: '/opt/python/cp27-cp27m/bin/python'
           ${{ if startsWith(env_pair.value, 'py27') }}:
             python: '2.7'
@@ -83,6 +84,17 @@ jobs:
         - task: UsePythonVersion@0
           inputs:
             versionSpec: ${{ coalesce(variables['python'], '3.x') }}
+
+        - ${{ if eq(variables.mesaopengl, 'true') }}:
+
+          - bash: git clone --depth 1 git://github.com/vtkiorg/gl-ci-helpers.git
+            displayName: Getting OpenGL helper script
+
+          - powershell: gl-ci-helpers\appveyor\install_opengl.ps1
+            displayName: Installing OpenGL library
+
+          - bash: rm -r gl-ci-helpers
+            displayName: Cleaning up OpenGL helper script
 
         - ${{ if eq(variables.xvfb, 'true') }}:
           - bash: |
