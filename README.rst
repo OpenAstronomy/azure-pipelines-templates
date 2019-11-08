@@ -133,8 +133,8 @@ tools, e.g:
 Note that as shown above, you don't need to specify all tools, only the ones for
 which you need to install packages.
 
-X virtual framebuffer
----------------------
+X virtual framebuffer (Linux)
+-----------------------------
 
 If you want to make use of the X virtual framebuffer (Xvfb) which is typically needed
 when testing packages that open graphical windows, you can set the ``xvfb`` parameter
@@ -151,6 +151,22 @@ to ``true``:
         - ...
 
 This parameter only has an effect on Linux, and is ignored on other platforms.
+
+Mesa OpenGL (Windows)
+---------------------
+
+If you need to use OpenGL on Windows, you should set the ``mesaopengl`` option
+to install the Mesa OpenGL libraries:
+
+.. code:: yaml
+
+    jobs:
+
+    - template: run-tox-env.yml@OpenAstronomy
+      parameters:
+        mesaopengl: true
+        envs:
+        - ...
 
 Conda
 -----

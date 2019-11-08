@@ -7,3 +7,12 @@ jobs:
     - linux32: py37-simple-linux32
     - macos: py37-simple-macos
     - windows: py37-simple-windows
+
+
+- template: run-tox-env.yml
+  parameters:
+    mesaopengl: true
+    envs:
+    - linux: py37-opengl-linux
+    - macos: py37-opengl-macos
+    - windows: py37-opengl-windows
