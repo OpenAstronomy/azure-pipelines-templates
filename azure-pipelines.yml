@@ -13,6 +13,5 @@ jobs:
   parameters:
     mesaopengl: true
     envs:
-    - linux: py37-opengl-linux
     - macos: py37-opengl-macos
     - windows: py37-opengl-windows
