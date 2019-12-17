@@ -224,12 +224,12 @@ precedence over global options:
 
     jobs:
     - template: run-tox-env.yml@OpenAstronomy
-      coverage: codecov
-      posargs: '-n=4'
-      libraries:
-        brew:
-        - fftw
       parameters:
+        coverage: codecov
+        posargs: '-n=4'
+        libraries:
+          brew:
+          - fftw
         envs:
         - linux: pep8
           coverage: false
