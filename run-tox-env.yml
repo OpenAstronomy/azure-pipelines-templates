@@ -33,7 +33,7 @@ jobs:
             python32bit: '/opt/python/cp37-cp37m/bin/python'
           ${{ if startsWith(env_pair.value, 'py38') }}:
             python: '3.8'
-            python32bit: '/opt/python/cp38-cp38m/bin/python'
+            python32bit: '/opt/python/cp38-cp38/bin/python'
           ${{ if eq(env_pair.key, 'windows') }}:
             source: 'call'
           ${{ if not(eq(env_pair.key, 'windows')) }}:
