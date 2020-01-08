@@ -1,20 +1,22 @@
-.. OpenAstronomy Azure Pipeline Guide and Template documentation master file, created by
-   sphinx-quickstart on Wed Jan  8 18:26:37 2020.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+======================================
+OpenAstronomy Azure Pipeline Templates
+======================================
 
-Welcome to OpenAstronomy Azure Pipeline Guide and Template's documentation!
-===========================================================================
+This repository contains set of templates for `Azure Pipelines
+<https://azure.microsoft.com/en-gb/services/devops/pipelines/>`_ that helps
+simplify configuration in individual packages. At this time, there are two main
+templates available - one to make it easy to map `tox
+<https://tox.readthedocs.org>`__ environments to builds on Azure Pipelines, and
+one to automate the process of releasing Python packages.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
+   common
+   run_tox_env
+   publish
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+The templates in this repository were inspired and adapted from `tox's
+<https://github.com/tox-dev/azure-pipelines-template>`__ and `SunPy's templates
+<https://github.com/sunpy/azure-pipelines-template>`_.
