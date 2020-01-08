@@ -319,24 +319,40 @@ To make use of this template, add the following to the ``azure-pipelines.yml`` f
     jobs:
     - template: publish.yml@OpenAstronomy
       parameters:
-        pypi_connection_name: 'pypi_endpoint'
+        ${{ if startsWith(variables['Build.SourceBranch'], 'refs/tags/v') }}:
+          pypi_connection_name: 'pypi_endpoint'
         targets:
         - sdist
         - wheels_linux
         - wheels_macos
         - wheels_windows
 
-``pypi_connection_name`` should be set to the **Connection Name** you set above.
-If the endpoint name you set is different from the connection name, you should
-also specify the endpoint name with the ``pypi_endpoint_name`` parameter.
-``targets`` should be set to a list of builds you want to generate - the
-options are:
+The ``if`` statement ensures that the wheels are only published for builds that
+are triggered by tags - though the wheels will still be built and tested for
+other commits.
+
+The ``pypi_connection_name`` entry should be set to the **Connection Name** you
+set above. If the endpoint name you set is different from the connection name,
+you should also specify the endpoint name with the ``pypi_endpoint_name``
+parameter. ``targets`` should be set to a list of builds you want to generate -
+the options are:
 
 * ``sdist``: source distribution
 * ``wheels_universal``: universal binary wheel for all platforms (which can be used if you have no compiled extensions)
 * ``wheels_linux``: binary wheels for Linux
 * ``wheels_macos``: binary wheels for MacOS X
 * ``wheels_windows``: binary wheels for Windows
+
+In addition to the above YAML, make sure that you include the following
+settings, which will allow Azure to run when a tag is pushed to GitHub::
+
+    trigger:
+      branches:
+        include:
+        - '*'
+      tags:
+        include:
+        - 'v*'
 
 If you want to run tests on the generated packages (which we recommend), you can make use of
 the following parameters:
@@ -346,7 +362,8 @@ the following parameters:
     jobs:
     - template: publish.yml@OpenAstronomy
       parameters:
-        pypi_connection_name: 'pypi_endpoint'
+        ${{ if startsWith(variables['Build.SourceBranch'], 'refs/tags/v') }}:
+          pypi_connection_name: 'pypi_endpoint'
         test_extras: "all,test"
         test_command: pytest --pyargs sunpy
         targets:
