@@ -47,7 +47,7 @@ jobs:
 
         pool:
           ${{ if eq(env_pair.key, 'macos') }}:
-            vmImage: macOS 10.13
+            vmImage: macOS 10.14
           ${{ if or(eq(env_pair.key, 'linux'), eq(env_pair.key, 'linux32')) }}:
             vmImage: Ubuntu 16.04
           ${{ if eq(env_pair.key, 'windows') }}:
