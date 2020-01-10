@@ -13,6 +13,7 @@ one to automate the process of releasing Python packages.
    :maxdepth: 1
    :caption: Contents:
 
+   setup
    common
    run_tox_env
    publish
