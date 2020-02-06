@@ -63,10 +63,10 @@ Non-Python dependencies
 
 To make sure that non-Python dependencies are installed before the tox
 environments are run, use the ``libraries`` parameter. This can have sections
-for the ``apt``, ``yum``, ``brew``, and ``choco`` tools which are used for
-``linux``, ``linux32``, ``macos``, and ``windows`` respectively, and each of
-these sections should contain a list of package names to install with these
-tools, e.g:
+for the ``apt``, ``yum``, ``brew`` (or ``brew-cask``), and ``choco`` tools which
+are used for ``linux``, ``linux32``, ``macos``, and ``windows`` respectively,
+and each of these sections should contain a list of package names to install
+with these tools, e.g:
 
 .. code:: yaml
 
