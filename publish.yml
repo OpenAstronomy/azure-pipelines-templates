@@ -18,11 +18,11 @@ jobs:
 
       pool:
         ${{ if eq(target, 'wheels_macos') }}:
-          vmImage: macOS 10.13
+          vmImage: macos-latest
         ${{ if eq(target, 'wheels_linux') }}:
-          vmImage: Ubuntu 16.04
+          vmImage: ubuntu-latest
         ${{ if eq(target, 'wheels_windows') }}:
-          vmImage: vs2017-win2016
+          vmImage: windows-latest
 
       steps:
         - checkout: self
