@@ -179,6 +179,10 @@ jobs:
         fetchDepth: 999999999
       - task: Npm@1
         inputs:
+          command: 'install'
+          workingDir: ${{ parameters.npm_dir }}
+      - task: Npm@1
+        inputs:
           command: 'publish'
           publishEndpoint: ${{ parameters.npm_connection_name}}
           workingDir: ${{ parameters.npm_dir }}
