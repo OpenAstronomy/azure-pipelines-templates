@@ -2,6 +2,7 @@ parameters:
   python_versions:
     - 3.7
     - 3.6
+  npm_dir: "."
 
 jobs:
 - ${{ each target in parameters.targets }}:
@@ -45,6 +46,25 @@ jobs:
           displayName: Running cibuildwheel
         - publish: 'wheelhouse'
           artifact: ${{ target }}
+
+  - ${{ if eq(target, 'npm') }}:
+
+    - job: ${{ target }}
+      dependsOn: ${{ parameters.dependsOn }}
+      condition: succeeded()
+
+      pool:
+        vmImage: ubuntu-latest
+
+      steps:
+        - checkout: self
+          submodules: ${{ coalesce(parameters.submodules, true) }}
+          fetchDepth: 999999999
+
+        - task: Npm@1
+          inputs:
+            command: 'install'
+            workingDir: ${{ parameters.npm_dir }}
 
   - ${{ if eq(target, 'sdist') }}:
     - job: ${{ target }}
@@ -146,3 +166,19 @@ jobs:
           artifactFeeds: ${{ parameters.artifact_feed}}
       - script:  ${{ format('python -m twine upload --skip-existing -r {0} --config-file $(PYPIRC_PATH) "wheelhouse/*"', parameters.artifact_feed) }}
         displayName: "upload sdist and wheels to Artifacts feed"
+
+- ${{ if parameters.npm_connection_name }}:
+  - job: publish_npm
+    dependsOn: ${{ parameters.targets }}
+    condition: succeeded()
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+      - checkout: self
+        submodules: ${{ coalesce(parameters.submodules, true) }}
+        fetchDepth: 999999999
+      - task: Npm@1
+        inputs:
+          command: 'publish'
+          publishEndpoint: ${{ parameters.npm_connection_name}}
+          workingDir: ${{ parameters.npm_dir }}
