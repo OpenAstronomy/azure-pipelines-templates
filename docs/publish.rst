@@ -111,3 +111,29 @@ be built on Python 3.6 and 3.7, and excluding 32-bit Windows and Linux.
     variables:
       CIBW_BUILD: cp36-* cp37-*
       CIBW_SKIP: "*-win32 *-manylinux1_i686"
+
+Jupyter widget packages
+-----------------------
+
+Packages that implement widgets for the Jupyter ecosystem also need to be built
+and published on https://www.npmjs.com/ - to do this, you will first need to add
+an npm service connection in Azure, which we will call ``npm_endpoint`` here (as
+for PyPI, you can use this for both the connection name and endpoint name).
+
+Once this is set up, you can include ``npm_connection_name`` alongside
+``pypi_connection_name``, you can add ``npm`` as a target, and you can optionally
+specify the directory in which to run the ``npm install`` and ``npm publish``
+commands using the ``npm_dir`` option (this defaults to the root of the repository):
+
+.. code:: yaml
+
+    jobs:
+    - template: publish.yml@OpenAstronomy
+      parameters:
+        ${{ if startsWith(variables['Build.SourceBranch'], 'refs/tags/v') }}:
+          pypi_connection_name: 'pypi_endpoint'
+          npm_connection_name: 'npm_endpoint'
+        npm_dir: 'js'
+        targets:
+          - npm
+          ...
