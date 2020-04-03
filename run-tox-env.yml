@@ -13,6 +13,7 @@ jobs:
         variables:
           friendly_name: '${{ env_pair.value }} [${{ env_pair.key }}]'
           posargs: ${{ coalesce(env['posargs'], parameters.posargs) }}
+          toxdeps: ${{ coalesce(env['toxdeps'], parameters.toxdeps) }}
           xvfb: ${{ and(coalesce(env['xvfb'], parameters.xvfb, false), eq(env_pair.key, 'linux')) }}
           mesaopengl: ${{ and(coalesce(env['mesaopengl'], parameters.mesaopengl, false), eq(env_pair.key, 'windows')) }}
           default32bit: '/opt/python/cp27-cp27m/bin/python'
@@ -130,12 +131,12 @@ jobs:
               conda install --yes --quiet --name testenv python=${{ variables.python }} pip
             displayName: Create and activate conda env
 
-          - script: python -m pip install --upgrade tox-conda
+          - script: python -m pip install --upgrade tox-conda ${{ variables.toxdeps }}
             displayName: install tox-conda
 
         - ${{ if eq(env_pair.key, 'linux32') }}:
 
-          - script: docker exec -i -w /project manylinux2010 linux32 ${{ coalesce(variables.python32bit, variables.default32bit) }} -m pip install --upgrade tox
+          - script: docker exec -i -w /project manylinux2010 linux32 ${{ coalesce(variables.python32bit, variables.default32bit) }} -m pip install --upgrade tox ${{ variables.toxdeps }}
             displayName: Install tox
 
           - script: docker exec -i -w /project manylinux2010 linux32 ${{ coalesce(variables.python32bit, variables.default32bit) }} -m tox -e ${{ env_pair.value }} -- ${{ variables['pytest_flag'] }} ${{ variables['posargs'] }}
@@ -143,7 +144,7 @@ jobs:
 
         - ${{ if ne(env_pair.key, 'linux32') }}:
 
-          - script: python -m pip install --upgrade tox
+          - script: python -m pip install --upgrade tox ${{ variables.toxdeps }}
             displayName: Install tox
 
           - script: tox -e ${{ env_pair.value }} -- ${{ variables['pytest_flag'] }} ${{ variables['posargs'] }}

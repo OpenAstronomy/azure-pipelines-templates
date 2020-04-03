@@ -85,6 +85,24 @@ with these tools, e.g:
 Note that as shown above, you don't need to specify all tools, only the ones for
 which you need to install packages.
 
+Pre-Tox Python dependencies
+---------------------------
+
+If you wish to install Python packages before tox is called, i.e. tox plugins,
+you can pass the ``toxdeps`` parameter. These packages are installed at the same
+time as tox itself.
+
+.. code:: yaml
+
+    jobs:
+
+    - template: run-tox-env.yml@OpenAstronomy
+      parameters:
+        toxdeps: tox-pypi-filter
+        envs:
+        - ...
+
+
 X virtual framebuffer (Linux)
 -----------------------------
 
