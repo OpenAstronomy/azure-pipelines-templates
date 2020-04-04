@@ -146,11 +146,13 @@ jobs:
       displayName: "install twine"
     # Get all artifacts from this build
     - ${{ each target in parameters.targets }}:
-      - task: DownloadPipelineArtifact@2
-        inputs:
-          buildType: 'current'
-          targetPath: 'wheelhouse'
-          artifactName: ${{ target }}
+      - ${{ if ne(target, 'npm') }}:
+        - task: DownloadPipelineArtifact@2
+          inputs:
+            buildType: 'current'
+            targetPath: 'wheelhouse'
+            artifactName: ${{ target }}
+
     - script: 'ls -R wheelhouse'
 
     - ${{ if parameters.pypi_connection_name }}:
