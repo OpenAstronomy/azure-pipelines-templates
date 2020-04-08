@@ -2,12 +2,20 @@ jobs:
 
 - template: run-tox-env.yml
   parameters:
+    libraries:
+      apt:
+        - libopenjp2-7
+      brew:
+        - openjpeg
     envs:
     - linux: py37-simple-linux
+      parameters:
+        libraries:
+          yum:
+            - openssl-devel
     - linux32: py37-simple-linux32
     - macos: py37-simple-macos
     - windows: py37-simple-windows
-
 
 - template: run-tox-env.yml
   parameters:
