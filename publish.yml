@@ -27,6 +27,7 @@ jobs:
 
       steps:
         - checkout: self
+          lfs: true
           submodules: ${{ coalesce(parameters.submodules, true) }}
           fetchDepth: 999999999
         - ${{ if not(eq(target, 'wheels_windows')) }}:
