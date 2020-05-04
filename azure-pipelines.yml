@@ -1,3 +1,8 @@
+variables:
+  CIBW_BUILD: cp38-*
+  CIBW_BEFORE_BUILD_LINUX: "yum -y install fftw-devel; git clean -xfd -e wheelhouse"
+  CIBW_BEFORE_BUILD_MACOS: "brew install fftw; git clean -xfd -e wheelhouse"
+
 jobs:
 
 - template: run-tox-env.yml
@@ -8,10 +13,18 @@ jobs:
     - macos: py37-simple-macos
     - windows: py37-simple-windows
 
-
 - template: run-tox-env.yml
   parameters:
     mesaopengl: true
     envs:
     - macos: py37-opengl-macos
     - windows: py37-opengl-windows
+
+- template: publish.yml
+  parameters:
+    libraries:
+      - libfftw3-dev
+    targets:
+      - wheels_linux
+      - wheels_macos
+      - sdist

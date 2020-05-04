@@ -45,6 +45,8 @@ To make use of this template, add the following to the ``azure-pipelines.yml`` f
       parameters:
         ${{ if startsWith(variables['Build.SourceBranch'], 'refs/tags/v') }}:
           pypi_connection_name: 'pypi_endpoint'
+        libraries:
+        - libfftw3-dev
         targets:
         - sdist
         - wheels_linux
@@ -66,6 +68,10 @@ the options are:
 * ``wheels_linux``: binary wheels for Linux
 * ``wheels_macos``: binary wheels for MacOS X
 * ``wheels_windows``: binary wheels for Windows
+
+Finally the ``libraries`` section allow you to pre-install libraries that are required to install the ``sdist`` build.
+This can be needed in order to test the built source distribution.
+The libraries are installed using the ``apt`` package manager.
 
 In addition to the above YAML, make sure that you include the following
 settings, which will allow Azure to run when a tag is pushed to GitHub::

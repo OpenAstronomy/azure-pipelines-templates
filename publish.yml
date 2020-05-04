@@ -1,8 +1,10 @@
 parameters:
   python_versions:
+    - 3.8
     - 3.7
     - 3.6
   npm_dir: "."
+  libraries: []
 
 jobs:
 - ${{ each target in parameters.targets }}:
@@ -41,7 +43,7 @@ jobs:
                 versionSpec: ${{ version }}
         - bash: python -m pip install --upgrade pip
           displayName: Upgrading pip
-        - bash: python -m pip install git+https://github.com/joerick/cibuildwheel.git
+        - bash: python -m pip install cibuildwheel
           displayName: Installing cibuildwheel
         - bash: cibuildwheel --output-dir wheelhouse .
           displayName: Running cibuildwheel
@@ -81,6 +83,9 @@ jobs:
         displayName: setup python3.7
         inputs:
           versionSpec: '3.7'
+      - ${{ each library in parameters.libraries }}:
+        - script: sudo apt-get install -y ${{ library }}
+          displayName: Installing ${{ library }} with apt
       - script: 'python -m pip install -U --user --force-reinstall pep517 setuptools_scm'
         displayName: "Install build tools"
       - script: 'python -m pep517.build --source --out-dir wheelhouse .'
