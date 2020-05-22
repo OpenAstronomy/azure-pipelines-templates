@@ -153,6 +153,9 @@ jobs:
             ${{ if eq(variables.xvfb, 'true') }}:
               env:
                 DISPLAY: :99.0
+            ${{ if and(eq(env_pair.key, 'macos'),contains(env_pair.value, 'conda')) }}:
+              env:
+                CONDA_BUILD_SYSROOT: /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
 
         - ${{ if eq(coalesce(env['coverage'], parameters.coverage), 'codecov') }}:
           - script: |
