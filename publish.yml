@@ -160,20 +160,32 @@ jobs:
             artifactName: ${{ target }}
 
     - script: 'ls -R wheelhouse'
+      displayName: "List files for upload"
 
     - ${{ if parameters.pypi_connection_name }}:
       - task: TwineAuthenticate@1
         inputs:
-          pythonUploadServiceConnection: ${{ parameters.pypi_connection_name}}
+          pythonUploadServiceConnection: ${{ parameters.pypi_connection_name }}
+
       - script:  ${{ format('python -m twine upload --skip-existing -r {0} --config-file $(PYPIRC_PATH) "wheelhouse/*"', coalesce(parameters.pypi_endpoint_name, parameters.pypi_connection_name)) }}
         displayName: "upload sdist and wheels to PyPI"
 
+    # If you want to specify an organisation scoped feed then you don't prefix with the project,
+    # if you want a project scoped feed, you must prefix the Authenticate task with the project
+    # however, twine only gets the feed name.
     - ${{ if parameters.artifact_feed }}:
-      - task: TwineAuthenticate@1
-        inputs:
-          artifactFeeds: ${{ parameters.artifact_feed}}
+      - ${{ if not(parameters.artifact_project) }}:
+        - task: TwineAuthenticate@1
+          inputs:
+            artifactFeed: ${{ parameters.artifact_feed }}
+
+      - ${{ if parameters.artifact_project }}:
+        - task: TwineAuthenticate@1
+          inputs:
+            artifactFeed: ${{ format('{0}/{1}', parameters.artifact_project, parameters.artifact_feed) }}
+
       - script:  ${{ format('python -m twine upload --skip-existing -r {0} --config-file $(PYPIRC_PATH) "wheelhouse/*"', parameters.artifact_feed) }}
-        displayName: "upload sdist and wheels to Artifacts feed"
+        displayName: "upload sdist and wheels to Artifact feed"
 
 - ${{ if parameters.npm_connection_name }}:
   - job: publish_npm
