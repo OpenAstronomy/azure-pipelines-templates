@@ -21,6 +21,12 @@ jobs:
     - macos: py37-opengl-macos
     - windows: py37-opengl-windows
 
+- template: run-tox-env.yml
+  parameters:
+    envs:
+    - linux: testtoxargs
+      toxargs: --notest
+
 - template: publish.yml
   parameters:
     libraries:
