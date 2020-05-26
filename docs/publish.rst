@@ -143,3 +143,84 @@ commands using the ``npm_dir`` option (this defaults to the root of the reposito
         targets:
           - npm
           ...
+
+
+Publishing to Azure Artifacts
+-----------------------------
+
+The publish template can also publish wheels and sdists to `Azure Artifacts <https://docs.microsoft.com/en-us/azure/devops/pipelines/artifacts/pypi>`__.
+This is useful for generating "nightly" wheels for use on other CI jobs etc.
+
+
+To get started with this, you first need to create a feed in Azure Artifacts.
+If you want to make this feed public, so that unauthenticated users can access it, it needs to be a "project scoped" feed, which is now the default, and the visibility needs to be set to "public".
+
+.. figure:: _static/images/azure_create_feed.png
+
+   Creating a public, project scoped feed in Azure.
+
+To upload to Azure Artifacts rather than PyPI, you specify the ``artifact_feed`` and ``artifact_project`` variables instead of ``pypi_connection_name``.
+
+
+If you wish to upload on all builds on master you would add a section to the ``publish.yml`` config which looks like:
+
+.. code:: yaml
+
+    jobs:
+    - template: publish.yml@OpenAstronomy
+      parameters:
+        ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
+          artifact_project : 'projectname'
+          artifact_feed : 'feedname'
+        ...
+
+This can be combined with the sections described above to upload to PyPI on tags or other conditions.
+
+
+Another option is to combine artifact uploads with scheduled (cron) builds, to upload every night, or other schedule:
+
+.. code:: yaml
+
+    jobs:
+    - template: publish.yml@OpenAstronomy
+      parameters:
+        ${{ if (variables['Build.Reason'], 'Schedule') }}:
+          artifact_project : 'projectname'
+          artifact_feed : 'feedname'
+        ...
+
+see the documentation on `scheduled triggers <https://docs.microsoft.com/en-us/azure/devops/pipelines/process/scheduled-triggers>`__ for details on configuring cron builds on Azure.
+
+Using Artifacts with pip
+########################
+
+To use the artifacts after uploading you need to specify ``--extra-index-url`` to pip, or add it to the pip config file.
+
+You can get instructions specific to your artifacts feed by clicking the "Connect to Feed" option in the Azure UI.
+The form of the URL is (at the time of writing) ``https://pkgs.dev.azure.com/<organizationname>/<projectname>/_packaging/<feedname>/pypi/simple/``.
+
+So an example pip command would be ``pip install --extra-index-url https://pkgs.dev.azure.com/sunpy/sunpy/_packaging/sunpy/pypi/simple/ sunpy``.
+
+
+Development Packages and ``setuptools_scm``
+-------------------------------------------
+
+If you are using setuptools_scm in its default configuration and wish to push non-tagged releases to Azure Artifacts (or PyPI) you will need to remove the "local" version component from the version number before building wheels or sdists.
+This is because local version strings are not supported for upload to PyPI or Azure artifacts.
+This, by default, is the section of the version number after the ``+``, which is normally the git hash.
+The template can remove this section of the version number for you by setting the ``remove_local_scheme: true`` variable.
+Using this your config block would look like:
+
+
+.. code:: yaml
+
+    jobs:
+    - template: publish.yml@OpenAstronomy
+      parameters:
+        ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
+          artifact_project : 'projectname'
+          artifact_feed : 'feedname'
+          remove_local_scheme: true
+        ...
+
+This is implemented by stripping all the characters in the version number after the ``+``.
