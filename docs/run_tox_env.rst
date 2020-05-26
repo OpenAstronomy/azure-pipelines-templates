@@ -102,6 +102,22 @@ time as tox itself.
         envs:
         - ...
 
+Commandline Arguments to tox
+----------------------------
+
+If you wish to pass extra command line arguments to the tox command, you can
+specify ``toxargs``.
+
+.. code:: yaml
+
+    jobs:
+
+    - template: run-tox-env.yml@OpenAstronomy
+      parameters:
+        envs:
+        - linux: pep8
+          toxargs: -i https://notpypi.org
+
 
 X virtual framebuffer (Linux)
 -----------------------------
