@@ -14,6 +14,7 @@ jobs:
           friendly_name: '${{ env_pair.value }} [${{ env_pair.key }}]'
           posargs: ${{ coalesce(env['posargs'], parameters.posargs) }}
           toxdeps: ${{ coalesce(env['toxdeps'], parameters.toxdeps) }}
+          toxargs: ${{ coalesce(env['toxargs'], parameters.toxargs) }}
           xvfb: ${{ and(coalesce(env['xvfb'], parameters.xvfb, false), eq(env_pair.key, 'linux')) }}
           mesaopengl: ${{ and(coalesce(env['mesaopengl'], parameters.mesaopengl, false), eq(env_pair.key, 'windows')) }}
           default32bit: '/opt/python/cp27-cp27m/bin/python'
@@ -140,7 +141,7 @@ jobs:
           - script: docker exec -i -w /project manylinux2010 linux32 ${{ coalesce(variables.python32bit, variables.default32bit) }} -m pip install --upgrade tox ${{ variables.toxdeps }}
             displayName: Install tox
 
-          - script: docker exec -i -w /project manylinux2010 linux32 ${{ coalesce(variables.python32bit, variables.default32bit) }} -m tox -e ${{ env_pair.value }} -- ${{ variables['pytest_flag'] }} ${{ variables['posargs'] }}
+          - script: docker exec -i -w /project manylinux2010 linux32 ${{ coalesce(variables.python32bit, variables.default32bit) }} -m tox -e ${{ env_pair.value }} ${{ variables['toxargs'] }} -- ${{ variables['pytest_flag'] }} ${{ variables['posargs'] }}
             displayName: Running tox
 
         - ${{ if ne(env_pair.key, 'linux32') }}:
@@ -148,7 +149,7 @@ jobs:
           - script: python -m pip install --upgrade tox ${{ variables.toxdeps }}
             displayName: Install tox
 
-          - script: tox -e ${{ env_pair.value }} -- ${{ variables['pytest_flag'] }} ${{ variables['posargs'] }}
+          - script: tox -e ${{ env_pair.value }} ${{ variables['toxargs'] }} -- ${{ variables['pytest_flag'] }} ${{ variables['posargs'] }}
             displayName: Running tox
             ${{ if eq(variables.xvfb, 'true') }}:
               env:
