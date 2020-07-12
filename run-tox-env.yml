@@ -41,9 +41,9 @@ jobs:
           ${{ if not(eq(env_pair.key, 'windows')) }}:
             source: 'source'
           ${{ if eq(env_pair.key, 'windows') }}:
-            pytest_flag: '--junitxml=junit\test-results.xml --cov-report=xml:$(System.DefaultWorkingDirectory)\coverage.xml'
+            pytest_flag: '--nunit-xml=nunit\test-results.xml --cov --cov-report=xml:$(System.DefaultWorkingDirectory)\coverage.xml'
           ${{ if not(eq(env_pair.key, 'windows')) }}:
-            pytest_flag: '--junitxml=junit/test-results.xml --cov-report=xml:$(System.DefaultWorkingDirectory)/coverage.xml'
+            pytest_flag: '--nunit-xml=nunit/test-results.xml --cov --cov-report=xml:$(System.DefaultWorkingDirectory)/coverage.xml'
 
         displayName: ${{ variables.friendly_name }}
 
@@ -170,12 +170,12 @@ jobs:
         - task: PublishTestResults@2
           condition: succeededOrFailed()
           inputs:
+            testResultsFormat: NUnit
             testResultsFiles: '**/test-*.xml'
             testRunTitle: 'Publish test results for ${{ variables.friendly_name }}'
 
-        - ${{ if eq(coalesce(env['coverage'], parameters.coverage), 'azure') }}:
-          - task: PublishCodeCoverageResults@1
-            condition: succeededOrFailed()
-            inputs:
-              codeCoverageTool: Cobertura
-              summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage.xml'
+        - task: PublishCodeCoverageResults@1
+          condition: succeededOrFailed()
+          inputs:
+            codeCoverageTool: Cobertura
+            summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage.xml'
