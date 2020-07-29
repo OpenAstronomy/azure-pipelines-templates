@@ -58,6 +58,25 @@ name of the service to use:
 
 At this time, only ``codecov`` is supported.
 
+Test Type
+---------
+
+By default, To enable coverage reporting, add a parameter ``coverage`` that is set to the
+name of the service to use:
+
+.. code:: yaml
+
+    jobs:
+
+    - template: run-tox-env.yml@OpenAstronomy
+      parameters:
+        coverage: codecov
+        envs:
+        - ...
+
+At this time, only ``codecov`` is supported.
+
+
 Non-Python dependencies
 -----------------------
 

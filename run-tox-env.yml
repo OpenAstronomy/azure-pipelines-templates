@@ -2,6 +2,7 @@ parameters:
   libraries: []
   envs: []
   coverage: false
+  nunit: false
 
 jobs:
 - ${{ each env in parameters.envs }}:
@@ -41,9 +42,15 @@ jobs:
           ${{ if not(eq(env_pair.key, 'windows')) }}:
             source: 'source'
           ${{ if eq(env_pair.key, 'windows') }}:
-            pytest_flag: '--nunit-xml=nunit\test-results.xml --cov --cov-report=xml:$(System.DefaultWorkingDirectory)\coverage.xml'
+            ${{ if eq(env_pair.nunit, 'true') }}:
+              pytest_flag: '--nunit-xml=nunit\test-results.xml --cov --cov-report=xml:$(System.DefaultWorkingDirectory)\coverage.xml'
+            ${{ if eq(env_pair.nunit, 'false') }}:
+              pytest_flag: '--junitxml=junit/test-results.xml --cov --cov-report=xml:$(System.DefaultWorkingDirectory)/coverage.xml'
           ${{ if not(eq(env_pair.key, 'windows')) }}:
-            pytest_flag: '--nunit-xml=nunit/test-results.xml --cov --cov-report=xml:$(System.DefaultWorkingDirectory)/coverage.xml'
+            ${{ if eq(env_pair.nunit, 'true') }}:
+              pytest_flag: '--nunit-xml=nunit/test-results.xml --cov --cov-report=xml:$(System.DefaultWorkingDirectory)/coverage.xml'
+            ${{ if eq(env_pair.nunit, 'false') }}:
+              pytest_flag: '--junitxml=junit/test-results.xml --cov --cov-report=xml:$(System.DefaultWorkingDirectory)/coverage.xml'
 
         displayName: ${{ variables.friendly_name }}
 
@@ -62,7 +69,7 @@ jobs:
           fetchDepth: 999999999
 
         - ${{ if eq(env_pair.key, 'linux32') }}:
-          - bash: docker run -v $PWD:/project -i --name manylinux2010 -d quay.io/pypa/manylinux2010_i686:latest /bin/bash
+          - bash: docker run -v $PWD:/project -i --name manylinux2014 -d quay.io/pypa/manylinux2014_i686:latest /bin/bash
             displayName: Start up Docker container
 
         - ${{ each tool_pair in coalesce(env['libraries'], parameters.libraries) }}:
@@ -81,7 +88,7 @@ jobs:
                 displayName: Installing ${{ library }} with apt
 
             - ${{ if and(eq(tool_pair.key, 'yum'), eq(env_pair.key, 'linux32')) }}:
-              - script: docker exec -i -w /project manylinux2010 linux32 yum install -y ${{ library }}
+              - script: docker exec -i -w /project manylinux2014 linux32 yum install -y ${{ library }}
                 displayName: Installing ${{ library }} with yum
 
             - ${{ if and(eq(tool_pair.key, 'choco'), eq(env_pair.key, 'windows')) }}:
@@ -138,10 +145,10 @@ jobs:
 
         - ${{ if eq(env_pair.key, 'linux32') }}:
 
-          - script: docker exec -i -w /project manylinux2010 linux32 ${{ coalesce(variables.python32bit, variables.default32bit) }} -m pip install --upgrade tox ${{ variables.toxdeps }}
+          - script: docker exec -i -w /project manylinux2014 linux32 ${{ coalesce(variables.python32bit, variables.default32bit) }} -m pip install --upgrade tox ${{ variables.toxdeps }}
             displayName: Install tox
 
-          - script: docker exec -i -w /project manylinux2010 linux32 ${{ coalesce(variables.python32bit, variables.default32bit) }} -m tox -e ${{ env_pair.value }} ${{ variables['toxargs'] }} -- ${{ variables['pytest_flag'] }} ${{ variables['posargs'] }}
+          - script: docker exec -i -w /project manylinux2014 linux32 ${{ coalesce(variables.python32bit, variables.default32bit) }} -m tox -e ${{ env_pair.value }} ${{ variables['toxargs'] }} -- ${{ variables['pytest_flag'] }} ${{ variables['posargs'] }}
             displayName: Running tox
 
         - ${{ if ne(env_pair.key, 'linux32') }}:
