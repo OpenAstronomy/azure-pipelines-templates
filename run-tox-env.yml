@@ -159,8 +159,10 @@ jobs:
                 CONDA_BUILD_SYSROOT: /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
 
         - ${{ if eq(coalesce(env['coverage'], parameters.coverage), 'codecov') }}:
-          - script: |
-              bash <(curl -s https://codecov.io/bash)
+          - task: Bash@3
+            inputs:
+              targetType: 'inline'
+              script: bash <(curl -s https://codecov.io/bash)
             displayName: Running codecov
             condition: succeededOrFailed()
             env:
