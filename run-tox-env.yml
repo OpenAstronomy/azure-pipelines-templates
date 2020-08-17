@@ -160,8 +160,7 @@ jobs:
 
         - ${{ if eq(coalesce(env['coverage'], parameters.coverage), 'codecov') }}:
           - script: |
-              python -m pip install --upgrade codecov
-              python -m codecov --name "${{ variables.friendly_name }}"
+              bash <(curl -s https://codecov.io/bash)
             displayName: Running codecov
             condition: succeededOrFailed()
             #env:
