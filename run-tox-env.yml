@@ -2,6 +2,7 @@ parameters:
   libraries: []
   envs: []
   coverage: false
+  pytest: true
 
 jobs:
 - ${{ each env in parameters.envs }}:
@@ -17,6 +18,7 @@ jobs:
           toxargs: ${{ coalesce(env['toxargs'], parameters.toxargs) }}
           xvfb: ${{ and(coalesce(env['xvfb'], parameters.xvfb, false), eq(env_pair.key, 'linux')) }}
           mesaopengl: ${{ and(coalesce(env['mesaopengl'], parameters.mesaopengl, false), eq(env_pair.key, 'windows')) }}
+          pytest: ${{ or(parameters.pytest, contains(env_pair.value, 'test')) }}
           default32bit: '/opt/python/cp27-cp27m/bin/python'
           ${{ if startsWith(env_pair.value, 'py27') }}:
             python: '2.7'
@@ -40,10 +42,12 @@ jobs:
             source: 'call'
           ${{ if not(eq(env_pair.key, 'windows')) }}:
             source: 'source'
-          ${{ if eq(env_pair.key, 'windows') }}:
+          ${{ if and(variables.pytest, eq(env_pair.key, 'windows')) }}:
             pytest_flag: '--junitxml=junit\test-results.xml --cov-report=xml:$(System.DefaultWorkingDirectory)\coverage.xml'
-          ${{ if not(eq(env_pair.key, 'windows')) }}:
+          ${{ if and(variables.pytest, not(eq(env_pair.key, 'windows'))) }}:
             pytest_flag: '--junitxml=junit/test-results.xml --cov-report=xml:$(System.DefaultWorkingDirectory)/coverage.xml'
+          ${{ if not(variables.pytest) }}:
+            pytest_flag: ''
 
         displayName: ${{ variables.friendly_name }}
 
