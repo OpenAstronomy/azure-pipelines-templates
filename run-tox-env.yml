@@ -47,9 +47,9 @@ jobs:
           #${{ if and(variables.pytest, not(eq(env_pair.key, 'windows'))) }}:
           #  pytest_flag: '--junitxml=junit/test-results.xml --cov-report=xml:$(System.DefaultWorkingDirectory)/coverage.xml'
           ${{ if not(variables.pytest) }}:
-            pytest_flag: 'not'
+            pytest_flag: 'not ${{ variables.pytest }}'
           ${{ if variables.pytest }}:
-            pytest_flag: 'yep'
+            pytest_flag: 'yep ${{ variables.pytest }}'
 
         displayName: ${{ variables.friendly_name }}
 
