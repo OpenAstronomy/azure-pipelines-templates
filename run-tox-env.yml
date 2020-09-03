@@ -60,6 +60,7 @@ jobs:
             vmImage: windows-latest
 
         steps:
+        - script: echo "$(variables.pytest) | $(variables.pytest_flag)"
         - checkout: self
           lfs: true
           submodules: ${{ coalesce(parameters.submodules, true) }}
@@ -171,11 +172,12 @@ jobs:
             env:
               CODECOV_TOKEN: $(CODECOV_TOKEN)
 
-        - task: PublishTestResults@2
-          condition: succeededOrFailed()
-          inputs:
-            testResultsFiles: '**/test-*.xml'
-            testRunTitle: 'Publish test results for ${{ variables.friendly_name }}'
+        - ${{ if variables['pytest'] }}:
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFiles: '**/test-*.xml'
+              testRunTitle: 'Publish test results for ${{ variables.friendly_name }}'
 
         - ${{ if eq(coalesce(env['coverage'], parameters.coverage), 'azure') }}:
           - task: PublishCodeCoverageResults@1
