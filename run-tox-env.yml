@@ -60,7 +60,7 @@ jobs:
             vmImage: windows-latest
 
         steps:
-        - script: echo "${{ variables.pytest_flag }}"
+        - script: echo "${{ variables.pytest_flag }} ${{ env_pair.key }} ${{ contains(env_pair.key, 'test') }}"
         - checkout: self
           lfs: true
           submodules: ${{ coalesce(parameters.submodules, true) }}
