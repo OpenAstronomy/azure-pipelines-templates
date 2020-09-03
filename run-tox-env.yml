@@ -18,7 +18,7 @@ jobs:
           toxargs: ${{ coalesce(env['toxargs'], parameters.toxargs) }}
           xvfb: ${{ and(coalesce(env['xvfb'], parameters.xvfb, false), eq(env_pair.key, 'linux')) }}
           mesaopengl: ${{ and(coalesce(env['mesaopengl'], parameters.mesaopengl, false), eq(env_pair.key, 'windows')) }}
-          pytest: ${{ or(not(eq(coalesce(env['pytest'], parameters.pytest), 'false')), contains(env_pair.key, 'test')) }}
+          pytest: ${{ not(eq(coalesce(env['pytest'], parameters.pytest), 'false')) }}
           default32bit: '/opt/python/cp27-cp27m/bin/python'
           ${{ if startsWith(env_pair.value, 'py27') }}:
             python: '2.7'
