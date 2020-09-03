@@ -42,12 +42,12 @@ jobs:
             source: 'call'
           ${{ if not(eq(env_pair.key, 'windows')) }}:
             source: 'source'
-          ${{ if and(variables.pytest, eq(env_pair.key, 'windows')) }}:
-            pytest_flag: '--junitxml=junit\test-results.xml --cov-report=xml:$(System.DefaultWorkingDirectory)\coverage.xml'
-          ${{ if and(variables.pytest, not(eq(env_pair.key, 'windows'))) }}:
-            pytest_flag: '--junitxml=junit/test-results.xml --cov-report=xml:$(System.DefaultWorkingDirectory)/coverage.xml'
-          ${{ if not(variables.pytest) }}:
-            pytest_flag: ''
+          #${{ if and(variables.pytest, eq(env_pair.key, 'windows')) }}:
+          #  pytest_flag: '--junitxml=junit\test-results.xml --cov-report=xml:$(System.DefaultWorkingDirectory)\coverage.xml'
+          #${{ if and(variables.pytest, not(eq(env_pair.key, 'windows'))) }}:
+          #  pytest_flag: '--junitxml=junit/test-results.xml --cov-report=xml:$(System.DefaultWorkingDirectory)/coverage.xml'
+          #${{ if not(variables.pytest) }}:
+          pytest_flag: '${{ variables.pytest }}'
 
         displayName: ${{ variables.friendly_name }}
 
@@ -60,7 +60,7 @@ jobs:
             vmImage: windows-latest
 
         steps:
-        - script: echo "${{ env_pair.value }} ${{ coalesce(env['pytest'], parameters.pytest) }} ${{ env['pytest'] }} ${{ variables.pytest }} ${{ variables.pytest_flag }}"
+        - script: echo "${{ variables.pytest_flag }}"
         - checkout: self
           lfs: true
           submodules: ${{ coalesce(parameters.submodules, true) }}
