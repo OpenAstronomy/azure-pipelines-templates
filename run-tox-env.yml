@@ -2,6 +2,7 @@ parameters:
   libraries: []
   envs: []
   coverage: false
+  pytest: true
 
 jobs:
 - ${{ each env in parameters.envs }}:
@@ -17,6 +18,7 @@ jobs:
           toxargs: ${{ coalesce(env['toxargs'], parameters.toxargs) }}
           xvfb: ${{ and(coalesce(env['xvfb'], parameters.xvfb, false), eq(env_pair.key, 'linux')) }}
           mesaopengl: ${{ and(coalesce(env['mesaopengl'], parameters.mesaopengl, false), eq(env_pair.key, 'windows')) }}
+          pytest: ${{ or(eq(coalesce(env['pytest'], parameters.pytest), 'true'), contains(env_pair.value, 'test')) }}
           default32bit: '/opt/python/cp27-cp27m/bin/python'
           ${{ if startsWith(env_pair.value, 'py27') }}:
             python: '2.7'
@@ -40,10 +42,12 @@ jobs:
             source: 'call'
           ${{ if not(eq(env_pair.key, 'windows')) }}:
             source: 'source'
-          ${{ if eq(env_pair.key, 'windows') }}:
+          ${{ if and(eq(variables.pytest, 'true'), eq(env_pair.key, 'windows')) }}:
             pytest_flag: '--junitxml=junit\test-results.xml --cov-report=xml:$(System.DefaultWorkingDirectory)\coverage.xml'
-          ${{ if not(eq(env_pair.key, 'windows')) }}:
+          ${{ if and(eq(variables.pytest, 'true'), not(eq(env_pair.key, 'windows'))) }}:
             pytest_flag: '--junitxml=junit/test-results.xml --cov-report=xml:$(System.DefaultWorkingDirectory)/coverage.xml'
+          ${{ if not(eq(variables.pytest, 'true')) }}:
+            pytest_flag: ''
 
         displayName: ${{ variables.friendly_name }}
 
@@ -167,11 +171,12 @@ jobs:
             env:
               CODECOV_TOKEN: $(CODECOV_TOKEN)
 
-        - task: PublishTestResults@2
-          condition: succeededOrFailed()
-          inputs:
-            testResultsFiles: '**/test-*.xml'
-            testRunTitle: 'Publish test results for ${{ variables.friendly_name }}'
+        - ${{ if eq(variables['pytest'], 'true') }}:
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFiles: '**/test-*.xml'
+              testRunTitle: 'Publish test results for ${{ variables.friendly_name }}'
 
         - ${{ if eq(coalesce(env['coverage'], parameters.coverage), 'azure') }}:
           - task: PublishCodeCoverageResults@1
