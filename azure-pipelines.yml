@@ -35,6 +35,6 @@ jobs:
     targets:
       - wheels_linux
       - wheels_macos
-      - wheels_cp3?-win32
+      - wheels_cp3[78]-win_amd64
       - wheels_cp37-manylinux_x86_64
       - sdist
