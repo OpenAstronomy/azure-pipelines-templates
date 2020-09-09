@@ -76,7 +76,7 @@ jobs:
       dependsOn: ${{ parameters.dependsOn }}
       condition: succeeded()
       pool:
-        vmImage: 'Ubuntu-16.04'
+        vmImage: ubuntu-latest
       steps:
       - checkout: self
         submodules: ${{ coalesce(parameters.submodules, true) }}
@@ -111,7 +111,7 @@ jobs:
       dependsOn: ${{ parameters.dependsOn }}
       condition: succeeded()
       pool:
-        vmImage: 'Ubuntu-16.04'
+        vmImage: ubuntu-latest
       steps:
       - checkout: self
         submodules: ${{ coalesce(parameters.submodules, true) }}
@@ -144,7 +144,7 @@ jobs:
     condition: succeeded()
 
     pool:
-      vmImage: 'Ubuntu-16.04'
+      vmImage: ubuntu-latest
 
     steps:
     - checkout: none
