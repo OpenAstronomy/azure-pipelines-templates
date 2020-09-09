@@ -1,8 +1,4 @@
 parameters:
-  python_versions:
-    - 3.8
-    - 3.7
-    - 3.6
   npm_dir: "."
   libraries: []
 
@@ -42,15 +38,7 @@ jobs:
           lfs: true
           submodules: ${{ coalesce(parameters.submodules, true) }}
           fetchDepth: 999999999
-        - ${{ if not(eq(variables.os, 'win')) }}:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: ${{ parameters.python_versions[0] }}
-        - ${{ if eq(variables.os, 'win') }}:
-          - ${{ each version in parameters.python_versions }}:
-            - task: UsePythonVersion@0
-              inputs:
-                versionSpec: ${{ version }}
+        - task: UsePythonVersion@0
         - ${{ if parameters.remove_local_scheme }}:
             - bash: echo "##vso[task.setvariable variable=SETUPTOOLS_SCM_PRETEND_VERSION]$(python setup.py --version | cut -d '+' -f 1)"
               displayName: Remove local scheme from version
