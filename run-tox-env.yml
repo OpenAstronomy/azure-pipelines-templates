@@ -163,13 +163,15 @@ jobs:
                 CONDA_BUILD_SYSROOT: /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
 
         - ${{ if eq(coalesce(env['coverage'], parameters.coverage), 'codecov') }}:
-          - script: |
-              python -m pip install --upgrade codecov
-              python -m codecov --name "${{ variables.friendly_name }}"
+          - task: Bash@3
+            inputs:
+              targetType: 'inline'
+              script: bash <(curl -s https://codecov.io/bash)
             displayName: Running codecov
             condition: succeededOrFailed()
-            env:
-              CODECOV_TOKEN: $(CODECOV_TOKEN)
+            ${{ if ne(variables.CODECOV_TOKEN, '') }}:
+              env:
+                CODECOV_TOKEN: $(CODECOV_TOKEN)
 
         - ${{ if eq(variables['pytest'], 'true') }}:
           - task: PublishTestResults@2
