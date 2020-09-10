@@ -8,6 +8,7 @@ jobs:
   - ${{ if startsWith(target, 'wheels_') }}:
 
     - job: ${{ replace(replace(replace(replace(replace(replace(target, '?', ''), '*', ''), '[', ''), ']', ''), '!', ''), '-', '_') }}
+      displayName: ${{ target }}
       dependsOn: ${{ parameters.dependsOn }}
       condition: succeeded()
 
