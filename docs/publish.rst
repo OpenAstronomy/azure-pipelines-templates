@@ -152,7 +152,7 @@ those simple builds the ``CIBW_BUILD`` environment variable will not be set
 allowing you to set the defaults as above.
 
 The only restriction on this is that the specification must contain one of
-``win``, ``macosx`` or ``manylinux`` to be able to select the operating system
+``win``, ``macos`` or ``linux`` to be able to select the operating system
 image to use.
 
 

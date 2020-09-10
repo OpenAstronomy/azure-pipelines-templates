@@ -17,19 +17,19 @@ jobs:
         CIBW_TEST_EXTRAS: ${{ parameters.test_extras }}
         OA_TARGET: ${{ target }}
         job_name: ${{ replace(replace(replace(replace(replace(replace(target, '?', ''), '*', ''), '[', ''), ']', ''), '!', ''), '-', '_') }}
-        ${{ if or(eq(target, 'wheels_macos'), contains(target, 'macosx')) }}:
-          os: 'macosx'
-        ${{ if or(eq(target, 'wheels_windows'), contains(target, 'win')) }}:
+        ${{ if contains(target, 'macos') }}:
+          os: 'macos'
+        ${{ if contains(target, 'win') }}:
           os: 'win'
-        ${{ if or(eq(target, 'wheels_linux'), contains(target, 'manylinux')) }}:
-          os: 'manylinux'
+        ${{ if contains(target, 'linux') }}:
+          os: 'linux'
         ${{ if not(or(eq(target, 'wheels_macos'), eq(target, 'wheels_linux'), eq(target, 'wheels_windows'))) }}:
           CIBW_BUILD: ${{ replace(target, 'wheels_', '') }}
 
       pool:
-        ${{ if eq(variables.os, 'macosx') }}:
+        ${{ if eq(variables.os, 'macos') }}:
           vmImage: macos-latest
-        ${{ if eq(variables.os, 'manylinux') }}:
+        ${{ if eq(variables.os, 'linux') }}:
           vmImage: ubuntu-latest
         ${{ if eq(variables.os, 'win') }}:
           vmImage: windows-latest
