@@ -8,7 +8,7 @@ jobs:
 - ${{ each env in parameters.envs }}:
   - ${{ each env_pair in env }}:
 
-    - ${{ if or(startsWith(env_pair.key, 'linux32'), eq(env_pair.key, 'linux'), eq(env_pair.key, 'macos'), eq(env_pair.key, 'windows')) }}:
+    - ${{ if or(startsWith(env_pair.key, 'linux'), eq(env_pair, 'manylinux'), eq(env_pair.key, 'macos'), eq(env_pair.key, 'windows')) }}:
 
       - job: ${{ coalesce(env['name'], variables['Agent.Id']) }}
         variables:
@@ -37,14 +37,13 @@ jobs:
             python: '3.9'
 
           # Docker and manylinux
-          ${{ if eq(env_pair.key, 'linux32') }}:
+          ${{ if or(eq(env_pair.key, 'linux32'), eq(env_pair.key, 'manylinux')) }}:
             default_manylinux_image: 'manylinux2010_i686'
           manylinux_image: ${{ coalesce(env['manylinux_image'], variables.default_manylinux_image, '') }}
           manylinux_python: ${{ format('/opt/python/cp{0}-cp{0}m/bin/python', replace(variables.python, '.', '')) }}
           docker_python_exec: ${{ coalesce(env['docker_python'], variables.manylinux_python, '/opt/python/cp27-cp27m/bin/python') }}
-          docker_image: ${{ coalesce(env['docker_image'], variables.manylinux_image, '') }}
-          docker_pull: ${{ coalesce(env['docker_pull'], env['docker_image'], format('quay.io/pypa/{0}:latest', variables.manylinux_image)) }}
-          docker_name: ${{ coalesce(env['docker_name'], replace(variables.docker_image, ':', '_')) }}
+          docker_image: ${{ coalesce(env['docker_image'], format('quay.io/pypa/{0}:latest', variables.manylinux_image), '') }}
+          docker_name: ${{ coalesce(env['docker_name'], replace(env['docker_image'], ':', '_'), variables.manylinx_image) }}
 
           ${{ if eq(env_pair.key, 'windows') }}:
             source: 'call'
@@ -77,7 +76,7 @@ jobs:
           fetchDepth: 999999999
 
         - ${{ if variables.docker_image }}:
-          - bash: docker run -v $PWD:/project -i --name ${{ variables.docker_name }} -d ${{ variables.docker_pull }} /bin/bash
+          - bash: docker run -v $PWD:/project -i --name ${{ variables.docker_name }} -d ${{ variables.docker_image }} /bin/bash
             displayName: Start up Docker container
 
         - ${{ each tool_pair in coalesce(env['libraries'], parameters.libraries) }}:
