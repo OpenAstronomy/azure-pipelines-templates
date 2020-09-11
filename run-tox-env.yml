@@ -57,7 +57,7 @@ jobs:
             pytest_flag: ''
 
         ${{ if variables.docker_image }}:
-          displayName: '${{ coalesce(env.name, env_pair.value) }} [${{ variables.docker_image }}]'
+          displayName: '${{ coalesce(env.name, env_pair.value) }} [docker ${{ variables.docker_image }}]'
         ${{ if not(variables.docker_image) }}:
           displayName: ${{ variables.friendly_name }}
 
