@@ -42,7 +42,7 @@ jobs:
           ${{ if eq(env_pair.key, 'linux32') }}:
             manylinux_image: 'manylinux2010_i686'
           manylinux_python: ${{ format('/opt/python/cp{0}-cp{0}m/bin/python', replace(variables.python, '.', '')) }}
-          docker_python_exec: ${{ coalesce(parameters.docker_python, variables.manylinux_python, '/opt/python/cp27-cp27m/bin/python') }}
+          docker_python_exec: ${{ coalesce(env['docker_python'], variables.manylinux_python, '/opt/python/cp27-cp27m/bin/python') }}
           docker_image: ${{ coalesce(env['docker_image'], variables.manylinux_image, '') }}
           docker_pull: ${{ coalesce(env['docker_pull'], env['docker_image'], format('quay.io/pypa/{0}:latest', variables.manylinux_image)) }}
 
