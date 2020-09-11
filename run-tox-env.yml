@@ -38,6 +38,10 @@ jobs:
             python: '3.9'
 
           # Docker and manylinux
+          ${{ if eq(env_pair.key, 'linux32') }}:
+            setarch: 'linux32'
+          ${{ if not(eq(env_pair.key, 'linux32')) }}:
+            setarch: ''
           ${{ if or(eq(env_pair.key, 'linux32'), eq(env_pair.key, 'manylinux')) }}:
             manylinux_container: ${{ coalesce(env['manylinux_image'], 'manylinux2010_i686') }}
             manylinux_image: ${{ format('quay.io/pypa/{0}:latest', variables.manylinux_container) }}
@@ -98,7 +102,7 @@ jobs:
                 displayName: Installing ${{ library }} with apt
 
             - ${{ if and(eq(tool_pair.key, 'yum'), or(eq(env_pair.key, 'linux32'), eq(env_pair.key, 'manylinux'))) }}:
-              - script: docker exec -i -w /project ${{ variables.docker_name }} toxrun yum install -y ${{ library }}
+              - script: docker exec -i -w /project ${{ variables.docker_name }} ${{ variables.setarch }} yum install -y ${{ library }}
                 displayName: Installing ${{ library }} with yum
 
             - ${{ if and(eq(tool_pair.key, 'choco'), eq(env_pair.key, 'windows')) }}:
@@ -156,10 +160,10 @@ jobs:
 
         - ${{ if variables.docker_image }}:
 
-          - script: docker exec -i -w /project ${{ variables.docker_name }} toxrun ${{ variables.docker_python_exec }} -m pip install --upgrade tox ${{ variables.toxdeps }}
+          - script: docker exec -i -w /project ${{ variables.docker_name }} ${{ variables.setarch }} ${{ variables.docker_python_exec }} -m pip install --upgrade tox ${{ variables.toxdeps }}
             displayName: Install tox
 
-          - script: docker exec -i -w /project ${{ variables.docker_name }} toxrun ${{ variables.docker_python_exec }} -m tox -e ${{ env_pair.value }} ${{ variables['toxargs'] }} -- ${{ variables['pytest_flag'] }} ${{ variables['posargs'] }}
+          - script: docker exec -i -w /project ${{ variables.docker_name }} ${{ variables.setarch }} ${{ variables.docker_python_exec }} -m tox -e ${{ env_pair.value }} ${{ variables['toxargs'] }} -- ${{ variables['pytest_flag'] }} ${{ variables['posargs'] }}
             displayName: Running tox
 
         - ${{ if not(variables.docker_image) }}:
