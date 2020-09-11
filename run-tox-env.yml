@@ -8,7 +8,7 @@ jobs:
 - ${{ each env in parameters.envs }}:
   - ${{ each env_pair in env }}:
 
-    - ${{ if or(startsWith(env_pair.key, 'linux'), eq(env_pair, 'manylinux'), eq(env_pair.key, 'macos'), eq(env_pair.key, 'windows')) }}:
+    - ${{ if or(startsWith(env_pair.key, 'linux'), eq(env_pair.key, 'manylinux'), eq(env_pair.key, 'macos'), eq(env_pair.key, 'windows')) }}:
 
       - job: ${{ coalesce(env['name'], variables['Agent.Id']) }}
         variables:
