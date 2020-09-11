@@ -267,9 +267,13 @@ When using docker the Xvfb, conda and libraries options will not work.
 Manylinux
 #########
 
-By setting the OS flag to ``manylinux`` (or ``linux32`` for backwards
-compatibility) the template will automatically select docker and use the
-``manylinux2010_i686`` image.
+There are two options for using manylinux, you can set the os flag to either
+``linux32`` or ``manylinux``. If it is set to ``linux32`` all the commands will
+be prefixed with the ``linux32`` command to set the architecture to i686.
+
+By setting the OS flag to ``manylinux`` or ``linux32``, the template will
+automatically select docker and use the ``manylinux2010_i686`` image. Which can
+be overridden by specifying the ``manylinux_image`` parameter.
 
 When using ``manylinux`` images, the ``libraries`` parameter will work, and you
 should use ``yum`` rather than ``apt`` as the tool name.
