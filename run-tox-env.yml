@@ -97,7 +97,7 @@ jobs:
               - script: sudo apt-get install -y ${{ library }}
                 displayName: Installing ${{ library }} with apt
 
-            - ${{ if and(eq(tool_pair.key, 'yum'), variables.manylinux_image) }}:
+            - ${{ if and(eq(tool_pair.key, 'yum'), or(eq(env_pair.key, 'linux32'), eq(env_pair.key, 'manylinux'))) }}:
               - script: docker exec -i -w /project ${{ variables.docker_name }} yum install -y ${{ library }}
                 displayName: Installing ${{ library }} with yum
 
