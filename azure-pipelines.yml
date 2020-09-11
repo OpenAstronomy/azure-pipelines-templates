@@ -13,13 +13,13 @@ jobs:
     - linux32: py37-simple-linux32
     - linux32: py38-simple-linux32
       libraries:
-        yum:
-          - openssl-devel
+      yum:
+        - openssl-devel
     - manylinux: py37-simple-linux
       manylinux_image: manylinux2014_x86_64
       libraries:
-        yum:
-          - openssl-devel
+      yum:
+        - openssl-devel
     - linux: py39-simple-linux
       docker_image: python:3.9.0rc1-slim-buster
       docker_python: /usr/local/bin/python
