@@ -13,8 +13,8 @@ jobs:
     - linux32: py37-simple-linux32
     - linux32: py37-simple-linux
       manylinux_image: manylinux2014_x86_64
-    - linux: py38-simple-linux
-      docker_image: python
+    - linux: py39-simple-linux
+      docker_image: python:3.9.0rc1-slim-buster
       docker_python: /usr/local/bin/python
     - macos: py37-simple-macos
     - windows: py37-simple-windows

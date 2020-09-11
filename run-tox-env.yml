@@ -44,6 +44,7 @@ jobs:
           docker_python_exec: ${{ coalesce(env['docker_python'], variables.manylinux_python, '/opt/python/cp27-cp27m/bin/python') }}
           docker_image: ${{ coalesce(env['docker_image'], variables.manylinux_image, '') }}
           docker_pull: ${{ coalesce(env['docker_pull'], env['docker_image'], format('quay.io/pypa/{0}:latest', variables.manylinux_image)) }}
+          docker_name: ${{ coalesce(env['docker_name'], replace(variables.docker_image, ':', '_')) }}
 
           ${{ if eq(env_pair.key, 'windows') }}:
             source: 'call'
@@ -76,7 +77,7 @@ jobs:
           fetchDepth: 999999999
 
         - ${{ if variables.docker_image }}:
-          - bash: docker run -v $PWD:/project -i --name ${{ variables.docker_image }} -d ${{ variables.docker_pull }} /bin/bash
+          - bash: docker run -v $PWD:/project -i --name ${{ variables.docker_name }} -d ${{ variables.docker_pull }} /bin/bash
             displayName: Start up Docker container
 
         - ${{ each tool_pair in coalesce(env['libraries'], parameters.libraries) }}:
@@ -95,16 +96,17 @@ jobs:
                 displayName: Installing ${{ library }} with apt
 
             - ${{ if and(eq(tool_pair.key, 'yum'), eq(env_pair.key, 'linux32')) }}:
-              - script: docker exec -i -w /project ${{ variables.docker_image }} yum install -y ${{ library }}
+              - script: docker exec -i -w /project ${{ variables.docker_name }} yum install -y ${{ library }}
                 displayName: Installing ${{ library }} with yum
 
             - ${{ if and(eq(tool_pair.key, 'choco'), eq(env_pair.key, 'windows')) }}:
               - script: choco install ${{ library }}
                 displayName: Installing ${{ library }} with choco
 
-        - task: UsePythonVersion@0
-          inputs:
-            versionSpec: ${{ coalesce(variables['python'], '3.x') }}
+        - ${{ if not(variables.docker_image) }}:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: ${{ coalesce(variables['python'], '3.x') }}
 
         - ${{ if eq(variables.mesaopengl, 'true') }}:
 
@@ -152,10 +154,10 @@ jobs:
 
         - ${{ if variables.docker_image }}:
 
-          - script: docker exec -i -w /project ${{ variables.docker_image }} ${{ variables.docker_python_exec }} -m pip install --upgrade tox ${{ variables.toxdeps }}
+          - script: docker exec -i -w /project ${{ variables.docker_name }} ${{ variables.docker_python_exec }} -m pip install --upgrade tox ${{ variables.toxdeps }}
             displayName: Install tox
 
-          - script: docker exec -i -w /project ${{ variables.docker_image }} ${{ variables.docker_python_exec }} -m tox -e ${{ env_pair.value }} ${{ variables['toxargs'] }} -- ${{ variables['pytest_flag'] }} ${{ variables['posargs'] }}
+          - script: docker exec -i -w /project ${{ variables.docker_name }} ${{ variables.docker_python_exec }} -m tox -e ${{ env_pair.value }} ${{ variables['toxargs'] }} -- ${{ variables['pytest_flag'] }} ${{ variables['posargs'] }}
             displayName: Running tox
 
         - ${{ if not(variables.docker_image) }}:
