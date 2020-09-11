@@ -19,25 +19,16 @@ jobs:
           xvfb: ${{ and(coalesce(env['xvfb'], parameters.xvfb, false), eq(env_pair.key, 'linux')) }}
           mesaopengl: ${{ and(coalesce(env['mesaopengl'], parameters.mesaopengl, false), eq(env_pair.key, 'windows')) }}
           pytest: ${{ or(eq(coalesce(env['pytest'], parameters.pytest), 'true'), contains(env_pair.value, 'test')) }}
-          default32bit: '/opt/python/cp27-cp27m/bin/python'
-          ${{ if startsWith(env_pair.value, 'py27') }}:
-            python: '2.7'
-            python32bit: '/opt/python/cp27-cp27m/bin/python'
-          ${{ if startsWith(env_pair.value, 'py34') }}:
-            python: '3.4'
-            python32bit: '/opt/python/cp34-cp34m/bin/python'
-          ${{ if startsWith(env_pair.value, 'py35') }}:
-            python: '3.5'
-            python32bit: '/opt/python/cp35-cp35m/bin/python'
-          ${{ if startsWith(env_pair.value, 'py36') }}:
-            python: '3.6'
-            python32bit: '/opt/python/cp36-cp36m/bin/python'
-          ${{ if startsWith(env_pair.value, 'py37') }}:
-            python: '3.7'
-            python32bit: '/opt/python/cp37-cp37m/bin/python'
-          ${{ if startsWith(env_pair.value, 'py38') }}:
-            python: '3.8'
-            python32bit: '/opt/python/cp38-cp38/bin/python'
+
+          # Docker and manylinux
+          ${{ if contains(env_pair.key, 'linux32_') }}:
+            manylinux_image: ${{ format('quay.io/pypa/{0}', replace(env_pair.key, 'linux32_', '')) }}
+          ${{ if eq(env_pair.key, 'linux32') }}:
+            manylinux_image: 'quay.io/pypa/manylinux2010_i686'
+          manylinux_python: ${{ format('/opt/python/cp{0}-cp{0}m/bin/python', replace(env_pair.value, 'py', '')) }}
+          docker_python_exec: ${{ coalesce(parameters.docker_python, variables.manylinux_python, '/opt/python/cp27-cp27m/bin/python') }}
+          docker_image: ${{ coalesce(parameters.docker_image, variables.manylinux_image, '') }}
+
           ${{ if eq(env_pair.key, 'windows') }}:
             source: 'call'
           ${{ if not(eq(env_pair.key, 'windows')) }}:
@@ -65,8 +56,8 @@ jobs:
           submodules: ${{ coalesce(parameters.submodules, true) }}
           fetchDepth: 999999999
 
-        - ${{ if eq(env_pair.key, 'linux32') }}:
-          - bash: docker run -v $PWD:/project -i --name manylinux2010 -d quay.io/pypa/manylinux2010_i686:latest /bin/bash
+        - ${{ if variables.docker_image }}:
+          - bash: docker run -v $PWD:/project -i --name ${{ variables.docker_image }} -d ${{ variables.docker_image }}:latest /bin/bash
             displayName: Start up Docker container
 
         - ${{ each tool_pair in coalesce(env['libraries'], parameters.libraries) }}:
@@ -85,7 +76,7 @@ jobs:
                 displayName: Installing ${{ library }} with apt
 
             - ${{ if and(eq(tool_pair.key, 'yum'), eq(env_pair.key, 'linux32')) }}:
-              - script: docker exec -i -w /project manylinux2010 linux32 yum install -y ${{ library }}
+              - script: docker exec -i -w /project ${{ variables.docker_image }} linux32 yum install -y ${{ library }}
                 displayName: Installing ${{ library }} with yum
 
             - ${{ if and(eq(tool_pair.key, 'choco'), eq(env_pair.key, 'windows')) }}:
@@ -140,15 +131,15 @@ jobs:
           - script: python -m pip install --upgrade tox-conda ${{ variables.toxdeps }}
             displayName: install tox-conda
 
-        - ${{ if eq(env_pair.key, 'linux32') }}:
+        - ${{ if variables.docker_image }}:
 
-          - script: docker exec -i -w /project manylinux2010 linux32 ${{ coalesce(variables.python32bit, variables.default32bit) }} -m pip install --upgrade tox ${{ variables.toxdeps }}
+          - script: docker exec -i -w /project ${{ variables.docker_image }} linux32 ${{ variables.docker_python_exec }} -m pip install --upgrade tox ${{ variables.toxdeps }}
             displayName: Install tox
 
-          - script: docker exec -i -w /project manylinux2010 linux32 ${{ coalesce(variables.python32bit, variables.default32bit) }} -m tox -e ${{ env_pair.value }} ${{ variables['toxargs'] }} -- ${{ variables['pytest_flag'] }} ${{ variables['posargs'] }}
+          - script: docker exec -i -w /project ${{ variables.docker_image }} linux32 ${{ variables.docker_python_exec }} -m tox -e ${{ env_pair.value }} ${{ variables['toxargs'] }} -- ${{ variables['pytest_flag'] }} ${{ variables['posargs'] }}
             displayName: Running tox
 
-        - ${{ if ne(env_pair.key, 'linux32') }}:
+        - ${{ if not(variables.docker_image) }}:
 
           - script: python -m pip install --upgrade tox ${{ variables.toxdeps }}
             displayName: Install tox
