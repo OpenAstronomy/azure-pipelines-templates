@@ -255,9 +255,50 @@ underscore
 Which is why they are not automatically set from the tox env names, as they
 frequently have hyphens in.
 
-Linux 32-bit
-------------
 
-When testing on 32-bit linux (i.e. with the OS set to ``linux32``, note that the
-Xvfb and conda options will not work. In addition, when using the ``libraries``
-parameter, you should use ``yum`` rather than ``apt`` as the tool name.
+Docker Jobs
+-----------
+
+This template has support for running tox inside docker containers. This was
+originally added to support testing against 32bit linux builds using the
+manylinux official docker images, so there is specific support for these images.
+When using docker the Xvfb, conda and libraries options will not work.
+
+Manylinux
+#########
+
+By setting the OS flag to ``manylinux`` (or ``linux32`` for backwards
+compatibility) the template will automatically select docker and use the
+``manylinux2010_i686`` image.
+
+When using ``manylinux`` images, the ``libraries`` parameter will work, and you
+should use ``yum`` rather than ``apt`` as the tool name.
+
+As a shortcut for the other docker options, when using ``manylinux`` you can set
+``manylinux_image`` to the name of the container you want to use. This excludes
+the ``quay.io/pypa`` prefix and also excludes any tag (``latest`` is always
+used).
+
+Other Docker Images
+###################
+
+You can also specify your own docker images in which to run tox. There are a few
+options available to control this behaviour, they all can only be specified on a per-env basis.
+The following example shows all the possible options even though some are redundant:
+
+.. code:: yaml
+
+    jobs:
+    - template: run-tox-env.yml@OpenAstronomy
+      parameters:
+        envs:
+        - linux: <job name>
+          docker_image: python:3.9.0rc1-slim-buster
+          docker_name: python39
+          docker_python: /usr/local/bin/python
+
+The options are as follows:
+
+* ``docker_image`` this is the name of the container to be created. It can be any valid argument to ``docker pull``, i.e ``python`` or ``quay.io/pypa/manylinux2010_i686``.
+* ``docker_name`` this is optional as long as ``docker_image`` is a valid container name. If you specify a tag in ``docker_image`` ``:`` will be replaced, so you will not need to specify ``docker_name``. However, if you specify a URL style image you will need to manually specify the container name with ``docker_name``.
+* ``docker_python`` this is the path inside the container to the docker executable.
