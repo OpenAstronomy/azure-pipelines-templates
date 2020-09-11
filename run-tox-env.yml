@@ -43,8 +43,8 @@ jobs:
             manylinux_image: 'manylinux2010_i686'
           manylinux_python: ${{ format('/opt/python/cp{0}-cp{0}m/bin/python', replace(variables.python, '.', '')) }}
           docker_python_exec: ${{ coalesce(parameters.docker_python, variables.manylinux_python, '/opt/python/cp27-cp27m/bin/python') }}
-          docker_image: ${{ coalesce(parameters.docker_image, variables.manylinux_image, '') }}
-          docker_pull: ${{ coalesce(parameters.docker_pull, format('quay.io/pypa/{0}', variables.manylinux_image), variables.docker_image) }}
+          docker_image: ${{ coalesce(env['docker_image'], variables.manylinux_image, '') }}
+          docker_pull: ${{ coalesce(env['docker_pull'], env['docker_image'], format('quay.io/pypa/{0}:latest', variables.manylinux_image)) }}
 
           ${{ if eq(env_pair.key, 'windows') }}:
             source: 'call'
@@ -62,7 +62,7 @@ jobs:
         pool:
           ${{ if eq(env_pair.key, 'macos') }}:
             vmImage: macos-latest
-          ${{ if or(eq(env_pair.key, 'linux'), eq(env_pair.key, 'linux32')) }}:
+          ${{ if or(eq(env_pair.key, 'linux'), startsWith(env_pair.key, 'linux32')) }}:
             vmImage: ubuntu-latest
           ${{ if eq(env_pair.key, 'windows') }}:
             vmImage: windows-latest
@@ -74,7 +74,7 @@ jobs:
           fetchDepth: 999999999
 
         - ${{ if variables.docker_image }}:
-          - bash: docker run -v $PWD:/project -i --name ${{ variables.docker_image }} -d ${{ variables.docker_pull }}:latest /bin/bash
+          - bash: docker run -v $PWD:/project -i --name ${{ variables.docker_image }} -d ${{ variables.docker_pull }} /bin/bash
             displayName: Start up Docker container
 
         - ${{ each tool_pair in coalesce(env['libraries'], parameters.libraries) }}:
