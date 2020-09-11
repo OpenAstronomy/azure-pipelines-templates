@@ -23,8 +23,6 @@ jobs:
           # Setup python version
           ${{ if startsWith(env_pair.value, 'py27') }}:
             python: '2.7'
-          ${{ if startsWith(env_pair.value, 'py34') }}:
-            python: '3.4'
           ${{ if startsWith(env_pair.value, 'py35') }}:
             python: '3.5'
           ${{ if startsWith(env_pair.value, 'py36') }}:
@@ -40,8 +38,11 @@ jobs:
           ${{ if or(eq(env_pair.key, 'linux32'), eq(env_pair.key, 'manylinux')) }}:
             manylinux_container: ${{ coalesce(env['manylinux_image'], 'manylinux2010_i686') }}
             manylinux_image: ${{ format('quay.io/pypa/{0}:latest', variables.manylinux_container) }}
-          ${{ if variables.python }}:
+          old_manylinux_path: or(contains(variables.python, '5'), contains(variables.python, '6'), contains(variables.python, '7'))
+          ${{ if eq(old_manylinux_path, 'true') }}:
             manylinux_python: ${{ format('/opt/python/cp{0}-cp{0}m/bin/python', replace(variables.python, '.', '')) }}
+          ${{ if eq(old_manylinux_path, 'false') }}:
+            manylinux_python: ${{ format('/opt/python/cp{0}-cp{0}/bin/python', replace(variables.python, '.', '')) }}
           docker_python_exec: ${{ coalesce(env['docker_python'], variables.manylinux_python, '/opt/python/cp27-cp27m/bin/python') }}
           docker_image: ${{ coalesce(env['docker_image'], variables.manylinux_image, '') }}
           docker_name: ${{ coalesce(env['docker_name'], replace(env['docker_image'], ':', '_'), variables.manylinux_container) }}
