@@ -1,30 +1,37 @@
 parameters:
-  python_versions:
-    - 3.8
-    - 3.7
-    - 3.6
   npm_dir: "."
   libraries: []
 
 jobs:
 - ${{ each target in parameters.targets }}:
 
-  - ${{ if or(eq(target, 'wheels_macos'), eq(target, 'wheels_linux'), eq(target, 'wheels_windows')) }}:
+  - ${{ if startsWith(target, 'wheels_') }}:
 
-    - job: ${{ target }}
+    - job: ${{ replace(replace(replace(replace(replace(replace(target, '?', ''), '*', ''), '[', ''), ']', ''), '!', ''), '-', '_') }}
+      displayName: ${{ target }}
       dependsOn: ${{ parameters.dependsOn }}
       condition: succeeded()
 
       variables:
         CIBW_TEST_COMMAND: ${{ parameters.test_command }}
         CIBW_TEST_EXTRAS: ${{ parameters.test_extras }}
+        OA_TARGET: ${{ target }}
+        job_name: ${{ replace(replace(replace(replace(replace(replace(target, '?', ''), '*', ''), '[', ''), ']', ''), '!', ''), '-', '_') }}
+        ${{ if contains(target, 'macos') }}:
+          os: 'macos'
+        ${{ if contains(target, 'win') }}:
+          os: 'win'
+        ${{ if contains(target, 'linux') }}:
+          os: 'linux'
+        ${{ if not(or(eq(target, 'wheels_macos'), eq(target, 'wheels_linux'), eq(target, 'wheels_windows'))) }}:
+          CIBW_BUILD: ${{ replace(target, 'wheels_', '') }}
 
       pool:
-        ${{ if eq(target, 'wheels_macos') }}:
+        ${{ if eq(variables.os, 'macos') }}:
           vmImage: macos-latest
-        ${{ if eq(target, 'wheels_linux') }}:
+        ${{ if eq(variables.os, 'linux') }}:
           vmImage: ubuntu-latest
-        ${{ if eq(target, 'wheels_windows') }}:
+        ${{ if eq(variables.os, 'win') }}:
           vmImage: windows-latest
 
       steps:
@@ -32,15 +39,8 @@ jobs:
           lfs: true
           submodules: ${{ coalesce(parameters.submodules, true) }}
           fetchDepth: 999999999
-        - ${{ if not(eq(target, 'wheels_windows')) }}:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: ${{ parameters.python_versions[0] }}
-        - ${{ if eq(target, 'wheels_windows') }}:
-          - ${{ each version in parameters.python_versions }}:
-            - task: UsePythonVersion@0
-              inputs:
-                versionSpec: ${{ version }}
+        - task: UsePythonVersion@0
+          displayName: Install Python
         - ${{ if parameters.remove_local_scheme }}:
             - bash: echo "##vso[task.setvariable variable=SETUPTOOLS_SCM_PRETEND_VERSION]$(python setup.py --version | cut -d '+' -f 1)"
               displayName: Remove local scheme from version
@@ -51,7 +51,7 @@ jobs:
         - bash: cibuildwheel --output-dir wheelhouse .
           displayName: Running cibuildwheel
         - publish: 'wheelhouse'
-          artifact: ${{ target }}
+          artifact: ${{ variables.job_name }}
 
   - ${{ if eq(target, 'npm') }}:
 
@@ -77,15 +77,13 @@ jobs:
       dependsOn: ${{ parameters.dependsOn }}
       condition: succeeded()
       pool:
-        vmImage: 'Ubuntu-16.04'
+        vmImage: ubuntu-latest
       steps:
       - checkout: self
         submodules: ${{ coalesce(parameters.submodules, true) }}
         fetchDepth: 999999999
       - task: UsePythonVersion@0
-        displayName: setup python3.7
-        inputs:
-          versionSpec: '3.7'
+        displayName: Install Python
       - ${{ each library in parameters.libraries }}:
         - script: sudo apt-get install -y ${{ library }}
           displayName: Installing ${{ library }} with apt
@@ -114,15 +112,13 @@ jobs:
       dependsOn: ${{ parameters.dependsOn }}
       condition: succeeded()
       pool:
-        vmImage: 'Ubuntu-16.04'
+        vmImage: ubuntu-latest
       steps:
       - checkout: self
         submodules: ${{ coalesce(parameters.submodules, true) }}
         fetchDepth: 999999999
       - task: UsePythonVersion@0
-        displayName: setup python3.7
-        inputs:
-          versionSpec: '3.7'
+        displayName: Install Python
       - script: 'python -m pip install -U --user --force-reinstall build setuptools_scm'
         displayName: "Install build tools"
       - ${{ if parameters.remove_local_scheme }}:
@@ -149,14 +145,12 @@ jobs:
     condition: succeeded()
 
     pool:
-      vmImage: 'Ubuntu-16.04'
+      vmImage: ubuntu-latest
 
     steps:
     - checkout: none
     - task: UsePythonVersion@0
-      inputs:
-        versionSpec: '3.7'
-      displayName: Install Python 3.7
+      displayName: Install Python
     - script: 'python -m pip install -U --user --force-reinstall twine'
       displayName: "install twine"
     # Get all artifacts from this build

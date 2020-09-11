@@ -68,6 +68,7 @@ the options are:
 * ``wheels_linux``: binary wheels for Linux
 * ``wheels_macos``: binary wheels for MacOS X
 * ``wheels_windows``: binary wheels for Windows
+* ``wheels_<cibuildwheel_spec>``: A detailed build spec for cibuildwheel (see below).
 
 Finally the ``libraries`` section allow you to pre-install libraries that are required to install the ``sdist`` build.
 This can be needed in order to test the built source distribution.
@@ -106,17 +107,54 @@ The ``test_command`` parameter gives a command that will be run in a temporary
 directory and has to rely on the installed version of the package (hence the use
 of ``--pyargs`` in the example above).
 
+
+Controlling cibuildwheel
+########################
+
 The wheel building process is carried out by `cibuildwheel
-<https://github.com/joerick/cibuildwheel>`_, and can be customized using all the
-environment variables supported by that package. For example, you can place the
-following at the top of your ``azure-pipelines.yml`` file to force wheels to only
-be built on Python 3.6 and 3.7, and excluding 32-bit Windows and Linux.
+<https://github.com/joerick/cibuildwheel>`_, there are two ways to control what
+versions of Python and what architectures wheels are built for.
+
+
+The first way is using the all the environment variables supported by
+cibuildwheel. For example, you can place the following at the top of your
+``azure-pipelines.yml`` file to force wheels to only be built on Python 3.6 and
+3.7, and excluding 32-bit Windows and Linux.
 
 .. code:: yaml
 
     variables:
       CIBW_BUILD: cp36-* cp37-*
       CIBW_SKIP: "*-win32 *-manylinux1_i686"
+
+
+The second is that you can configure the ``CIBW_BUILD`` environment variable via
+the ``targets`` list. This is particularly useful if you need to split different
+architectures over multiple jobs due to timeouts or a desire for faster
+completion. To do this you can place any valid option for
+`CIBW_BUILD <https://cibuildwheel.readthedocs.io/en/stable/options/#build-skip>`__
+after ``wheels_`` in the target list. For example you can setup a manual set of
+builds as follows:
+
+.. code:: yaml
+
+    targets:
+    - sdist
+    - wheels_cp3[78]-manylinux*
+    - wheels_cp38-macosx_x86_64
+    - wheels_cp37-macosx_x86_64
+    - wheels_cp3?-win32
+    - wheels_cp3?-win_amd64
+
+
+You can also combine these specifications with the simple OS specifications, for
+those simple builds the ``CIBW_BUILD`` environment variable will not be set
+allowing you to set the defaults as above.
+
+The only restriction on this is that the specification must contain one of
+``win``, ``macos`` or ``linux`` to be able to select the operating system
+image to use.
+
 
 Jupyter widget packages
 -----------------------
