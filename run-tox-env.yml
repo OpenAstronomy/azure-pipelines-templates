@@ -8,7 +8,7 @@ jobs:
 - ${{ each env in parameters.envs }}:
   - ${{ each env_pair in env }}:
 
-    - ${{ if or(eq(env_pair.key, 'linux32'), eq(env_pair.key, 'linux'), eq(env_pair.key, 'macos'), eq(env_pair.key, 'windows')) }}:
+    - ${{ if or(startsWith(env_pair.key, 'linux32'), eq(env_pair.key, 'linux'), eq(env_pair.key, 'macos'), eq(env_pair.key, 'windows')) }}:
 
       - job: ${{ coalesce(env['name'], variables['Agent.Id']) }}
         variables:
@@ -20,12 +20,28 @@ jobs:
           mesaopengl: ${{ and(coalesce(env['mesaopengl'], parameters.mesaopengl, false), eq(env_pair.key, 'windows')) }}
           pytest: ${{ or(eq(coalesce(env['pytest'], parameters.pytest), 'true'), contains(env_pair.value, 'test')) }}
 
+          # Setup python version
+          ${{ if startsWith(env_pair.value, 'py27') }}:
+            python: '2.7'
+          ${{ if startsWith(env_pair.value, 'py34') }}:
+            python: '3.4'
+          ${{ if startsWith(env_pair.value, 'py35') }}:
+            python: '3.5'
+          ${{ if startsWith(env_pair.value, 'py36') }}:
+            python: '3.6'
+          ${{ if startsWith(env_pair.value, 'py37') }}:
+            python: '3.7'
+          ${{ if startsWith(env_pair.value, 'py38') }}:
+            python: '3.8'
+          ${{ if startsWith(env_pair.value, 'py39') }}:
+            python: '3.9'
+
           # Docker and manylinux
           ${{ if contains(env_pair.key, 'linux32_') }}:
             manylinux_image: ${{ replace(env_pair.key, 'linux32_', '') }}
           ${{ if eq(env_pair.key, 'linux32') }}:
             manylinux_image: 'manylinux2010_i686'
-          manylinux_python: ${{ format('/opt/python/cp{0}-cp{0}m/bin/python', replace(env_pair.value, 'py', '')) }}
+          manylinux_python: ${{ format('/opt/python/cp{0}-cp{0}m/bin/python', replace(variables.python, '.', '')) }}
           docker_python_exec: ${{ coalesce(parameters.docker_python, variables.manylinux_python, '/opt/python/cp27-cp27m/bin/python') }}
           docker_image: ${{ coalesce(parameters.docker_image, variables.manylinux_image, '') }}
           docker_pull: ${{ coalesce(parameters.docker_pull, format('quay.io/pypa/{0}', variables.manylinux_image), variables.docker_image) }}
