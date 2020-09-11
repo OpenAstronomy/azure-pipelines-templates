@@ -11,10 +11,9 @@ jobs:
     - linux: py37-simple-linux 
       name: py37_simple_linux_custom_name
     - linux32: py37-simple-linux32
-    - linux32_manylinux2014_x86_64: py37-simple-linux
-      name: py37_simple_linux_manylinux_x86_64
+    - linux32: py37-simple-linux
+      manylinux_image: manylinux2014_x86_64
     - linux: py37-simple-linux
-      name: py37_simple_linux_docker_python
       docker_image: python
       docker_python: /usr/local/bin/python
     - macos: py37-simple-macos

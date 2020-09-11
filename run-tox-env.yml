@@ -37,10 +37,9 @@ jobs:
             python: '3.9'
 
           # Docker and manylinux
-          ${{ if contains(env_pair.key, 'linux32_') }}:
-            manylinux_image: ${{ replace(env_pair.key, 'linux32_', '') }}
           ${{ if eq(env_pair.key, 'linux32') }}:
-            manylinux_image: 'manylinux2010_i686'
+            default_manylinux_image: 'manylinux2010_i686'
+          manylinux_image: ${{ coalesce(env['manylinux_image'], variables.default_manylinux_image, '') }}
           manylinux_python: ${{ format('/opt/python/cp{0}-cp{0}m/bin/python', replace(variables.python, '.', '')) }}
           docker_python_exec: ${{ coalesce(env['docker_python'], variables.manylinux_python, '/opt/python/cp27-cp27m/bin/python') }}
           docker_image: ${{ coalesce(env['docker_image'], variables.manylinux_image, '') }}
@@ -57,12 +56,15 @@ jobs:
           ${{ if not(eq(variables.pytest, 'true')) }}:
             pytest_flag: ''
 
-        displayName: ${{ variables.friendly_name }}
+        ${{ if variables.docker_image }}:
+          displayName: '${{ coalesce(env.name, env_pair.value) }} [${{ variables.docker_image }}]'
+        ${{ if not(variables.docker_image) }}:
+          displayName: ${{ variables.friendly_name }}
 
         pool:
           ${{ if eq(env_pair.key, 'macos') }}:
             vmImage: macos-latest
-          ${{ if or(eq(env_pair.key, 'linux'), startsWith(env_pair.key, 'linux32')) }}:
+          ${{ if startsWith(env_pair.key, 'linux') }}:
             vmImage: ubuntu-latest
           ${{ if eq(env_pair.key, 'windows') }}:
             vmImage: windows-latest
