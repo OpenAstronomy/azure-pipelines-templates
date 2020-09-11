@@ -82,6 +82,8 @@ jobs:
           - bash: docker run -v $PWD:/project -i --name ${{ variables.docker_name }} -d ${{ variables.docker_image }} /bin/bash
             displayName: Start up Docker container
 
+        - bash: echo ${{ coalesce(env['libraries'], parameters.libraries) }}
+
         - ${{ each tool_pair in coalesce(env['libraries'], parameters.libraries) }}:
           - ${{ each library in tool_pair.value }}:
 
