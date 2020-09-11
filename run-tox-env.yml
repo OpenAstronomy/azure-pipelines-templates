@@ -38,11 +38,13 @@ jobs:
 
           # Docker and manylinux
           ${{ if or(eq(env_pair.key, 'linux32'), eq(env_pair.key, 'manylinux')) }}:
-            default_manylinux_image: 'manylinux2010_i686'
-          manylinux_image: ${{ coalesce(env['manylinux_image'], variables.default_manylinux_image, '') }}
+            default_manylinux_container: 'manylinux2010_i686'
+          manylinux_container: ${{ coalesce(env['manylinux_image'], variables.default_manylinux_container, '') }}
+          ${{ if variables.manylinux_container }}:
+            manylinux_image: format('quay.io/pypa/{0}:latest', variables.manylinux_container)
           manylinux_python: ${{ format('/opt/python/cp{0}-cp{0}m/bin/python', replace(variables.python, '.', '')) }}
           docker_python_exec: ${{ coalesce(env['docker_python'], variables.manylinux_python, '/opt/python/cp27-cp27m/bin/python') }}
-          docker_image: ${{ coalesce(env['docker_image'], format('quay.io/pypa/{0}:latest', variables.manylinux_image), '') }}
+          docker_image: ${{ coalesce(env['docker_image'], variables.manylinux_image, '') }}
           docker_name: ${{ coalesce(env['docker_name'], replace(env['docker_image'], ':', '_'), variables.manylinx_image) }}
 
           ${{ if eq(env_pair.key, 'windows') }}:
