@@ -288,6 +288,9 @@ Other Docker Images
 
 You can also specify your own docker images in which to run tox. There are a few
 options available to control this behaviour, they all can only be specified on a per-env basis.
+The running of the docker commands are not dependant on the operating system,
+although setting the os to ``linux32`` will cause all commands in the container
+to be prefixed with the ``linux32`` setarch binary.
 The following example shows all the possible options even though some are redundant:
 
 .. code:: yaml
@@ -304,5 +307,5 @@ The following example shows all the possible options even though some are redund
 The options are as follows:
 
 * ``docker_image`` this is the name of the container to be created. It can be any valid argument to ``docker pull``, i.e ``python`` or ``quay.io/pypa/manylinux2010_i686``.
-* ``docker_name`` this is optional as long as ``docker_image`` is a valid container name. If you specify a tag in ``docker_image`` ``:`` will be replaced, so you will not need to specify ``docker_name``. However, if you specify a URL style image you will need to manually specify the container name with ``docker_name``.
+* ``docker_name`` this is optional as long as ``docker_image`` is a valid container name. If you specify a tag in ``docker_image`` ``:`` and ``/`` will be replaced, so you will not need to specify ``docker_name``. However, if you specify a more complex image you will need to manually specify the container name with ``docker_name``.
 * ``docker_python`` this is the path inside the container to the docker executable.

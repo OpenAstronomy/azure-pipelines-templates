@@ -50,7 +50,7 @@ jobs:
 
           docker_python_exec: ${{ coalesce(env['docker_python'], variables.manylinux_python, '/opt/python/cp27-cp27m/bin/python') }}
           docker_image: ${{ coalesce(env['docker_image'], variables.manylinux_image, '') }}
-          docker_name: ${{ coalesce(env['docker_name'], replace(env['docker_image'], ':', '_'), variables.manylinux_container) }}
+          docker_name: ${{ coalesce(env['docker_name'], replace(replace(env['docker_image'], ':', '_'), '/', '_'), variables.manylinux_container) }}
 
           ${{ if eq(env_pair.key, 'windows') }}:
             source: 'call'
