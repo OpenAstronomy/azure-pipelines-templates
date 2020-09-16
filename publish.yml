@@ -141,7 +141,11 @@ jobs:
 
 - ${{ if coalesce(parameters.pypi_connection_name, parameters.artifact_feed) }}:
   - job: publish
-    dependsOn: ${{ parameters.targets }}
+
+    dependsOn:
+    - ${{ each target in parameters.targets }}:
+      - ${{ replace(replace(replace(replace(replace(replace(target, '?', ''), '*', ''), '[', ''), ']', ''), '!', ''), '-', '_') }}
+
     condition: succeeded()
 
     pool:
@@ -160,7 +164,7 @@ jobs:
           inputs:
             buildType: 'current'
             targetPath: 'wheelhouse'
-            artifactName: ${{ target }}
+            artifactName: ${{ replace(replace(replace(replace(replace(replace(target, '?', ''), '*', ''), '[', ''), ']', ''), '!', ''), '-', '_') }}
 
     - script: 'ls -R wheelhouse'
       displayName: "List files for upload"
