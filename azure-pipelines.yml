@@ -30,6 +30,7 @@ jobs:
 
 - template: publish.yml
   parameters:
+    artifact_project: azure-pipelines-templates
     artifact_feed: testfeed
     libraries:
       - libfftw3-dev
