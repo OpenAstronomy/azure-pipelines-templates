@@ -144,8 +144,7 @@ jobs:
 
     dependsOn:
     - ${{ each target in parameters.targets }}:
-      - ${{ if or(startsWith(target, 'wheels_'), eq(target, 'sdist')) }}:
-        - ${{ replace(replace(replace(replace(replace(replace(target, '?', ''), '*', ''), '[', ''), ']', ''), '!', ''), '-', '_') }}
+      - ${{ replace(replace(replace(replace(replace(replace(target, '?', ''), '*', ''), '[', ''), ']', ''), '!', ''), '-', '_') }}
 
     condition: succeeded()
 
