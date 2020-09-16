@@ -30,7 +30,7 @@ jobs:
 
 - template: publish.yml
   parameters:
-    artifact_feed: test-feed
+    artifact_feed: testfeed
     libraries:
       - libfftw3-dev
     targets:
