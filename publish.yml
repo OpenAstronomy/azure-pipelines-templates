@@ -5,7 +5,7 @@ parameters:
 jobs:
 - ${{ each target in parameters.targets }}:
 
-  - ${{ if startsWith(target, 'wheels_') }}:
+  - ${{ if and(startsWith(target, 'wheels_'),ne(target, 'wheels_universal')) }}:
 
     - job: ${{ replace(replace(replace(replace(replace(replace(target, '?', ''), '*', ''), '[', ''), ']', ''), '!', ''), '-', '_') }}
       displayName: ${{ target }}
