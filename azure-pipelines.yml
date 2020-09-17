@@ -51,9 +51,9 @@ jobs:
       - sdist
 
 
-- template: publish.yml
-  parameters:
-    libraries:
-      - libfftw3-dev
-    targets:
-      - wheels_universal
+# - template: publish.yml
+#   parameters:
+#     libraries:
+#       - libfftw3-dev
+#     targets:
+#       - wheels_universal
