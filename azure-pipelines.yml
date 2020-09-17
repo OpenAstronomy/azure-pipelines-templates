@@ -49,3 +49,14 @@ jobs:
       - wheels_cp3[78]-win_amd64
       - wheels_cp37-manylinux_x86_64
       - sdist
+
+
+- template: publish.yml
+  parameters:
+    artifact_project: azure-pipelines-templates
+    artifact_feed: testfeed
+    libraries:
+      - libfftw3-dev
+    targets:
+      - wheels_universal
+      - sdist
