@@ -83,7 +83,9 @@ jobs:
         submodules: ${{ coalesce(parameters.submodules, true) }}
         fetchDepth: 999999999
       - task: UsePythonVersion@0
-        displayName: Install Python
+        displayName: setup python3.8
+        inputs:
+          versionSpec: '3.8'
       - ${{ each library in parameters.libraries }}:
         - script: sudo apt-get install -y ${{ library }}
           displayName: Installing ${{ library }} with apt
@@ -118,7 +120,9 @@ jobs:
         submodules: ${{ coalesce(parameters.submodules, true) }}
         fetchDepth: 999999999
       - task: UsePythonVersion@0
-        displayName: Install Python
+        displayName: setup python3.8
+        inputs:
+          versionSpec: '3.8'
       - script: 'python -m pip install -U --user --force-reinstall build setuptools_scm'
         displayName: "Install build tools"
       - ${{ if parameters.remove_local_scheme }}:
@@ -154,7 +158,9 @@ jobs:
     steps:
     - checkout: none
     - task: UsePythonVersion@0
-      displayName: Install Python
+      displayName: setup python3.8
+      inputs:
+        versionSpec: '3.8'
     - script: 'python -m pip install -U --user --force-reinstall twine'
       displayName: "install twine"
     # Get all artifacts from this build
