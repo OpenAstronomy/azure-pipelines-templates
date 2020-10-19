@@ -2,6 +2,7 @@ parameters:
   envs: []
   coverage: false
   pytest: true
+  default_python: '3.x'
 
 jobs:
 - ${{ each env in parameters.envs }}:
@@ -112,7 +113,7 @@ jobs:
         - ${{ if not(variables.docker_image) }}:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: ${{ coalesce(variables['python'], '3.x') }}
+              versionSpec: ${{ coalesce(variables['python'], parameters.default_python) }}
 
         - ${{ if eq(variables.mesaopengl, 'true') }}:
 
