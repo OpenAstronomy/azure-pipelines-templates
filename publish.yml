@@ -41,11 +41,11 @@ jobs:
           fetchDepth: 999999999
         - task: UsePythonVersion@0
           displayName: Install Python
-        - ${{ if parameters.remove_local_scheme }}:
-            - bash: echo "##vso[task.setvariable variable=SETUPTOOLS_SCM_PRETEND_VERSION]$(python setup.py --version | cut -d '+' -f 1)"
-              displayName: Remove local scheme from version
-        - bash: python -m pip install --upgrade pip
+        - bash: python -m pip install --upgrade pip execute-517
           displayName: Upgrading pip
+        - ${{ if parameters.remove_local_scheme }}:
+            - bash: echo "##vso[task.setvariable variable=SETUPTOOLS_SCM_PRETEND_VERSION]$(execute-517 'setup.py --version' | cut -d '+' -f 1)"
+              displayName: Remove local scheme from version
         - bash: python -m pip install cibuildwheel
           displayName: Installing cibuildwheel
         - bash: cibuildwheel --output-dir wheelhouse .
@@ -89,10 +89,10 @@ jobs:
       - ${{ each library in parameters.libraries }}:
         - script: sudo apt-get install -y ${{ library }}
           displayName: Installing ${{ library }} with apt
-      - script: 'python -m pip install -U --user --force-reinstall build setuptools_scm'
+      - script: 'python -m pip install -U --force-reinstall build execute-517'
         displayName: "Install build tools"
       - ${{ if parameters.remove_local_scheme }}:
-          - bash: echo "##vso[task.setvariable variable=SETUPTOOLS_SCM_PRETEND_VERSION]$(python setup.py --version | cut -d '+' -f 1)"
+          - bash: echo "##vso[task.setvariable variable=SETUPTOOLS_SCM_PRETEND_VERSION]$(execute-517 'setup.py --version' | cut -d '+' -f 1)"
             displayName: Remove local scheme from version
       - script: 'python -m build --sdist --outdir wheelhouse .'
         displayName: "Build source distribution"
@@ -123,10 +123,10 @@ jobs:
         displayName: setup python3.8
         inputs:
           versionSpec: '3.8'
-      - script: 'python -m pip install -U --user --force-reinstall build setuptools_scm'
+      - script: 'python -m pip install -U --force-reinstall build execute-517'
         displayName: "Install build tools"
       - ${{ if parameters.remove_local_scheme }}:
-          - bash: echo "##vso[task.setvariable variable=SETUPTOOLS_SCM_PRETEND_VERSION]$(python setup.py --version | cut -d '+' -f 1)"
+          - bash: echo "##vso[task.setvariable variable=SETUPTOOLS_SCM_PRETEND_VERSION]$(execute-517 'setup.py --version' | cut -d '+' -f 1)"
             displayName: Remove local scheme from version
       - script: 'python -m build --wheel --outdir wheelhouse .'
         displayName: "Build universal wheel"
