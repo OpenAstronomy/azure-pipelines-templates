@@ -172,7 +172,7 @@ jobs:
           - script: python -m pip install --upgrade tox ${{ variables.toxdeps }}
             displayName: Install tox
 
-          - script: tox -e ${{ env_pair.value }} ${{ variables['toxargs'] }} -- ${{ variables['pytest_flag'] }} ${{ variables['posargs'] }}
+          - script: python -m tox -e ${{ env_pair.value }} ${{ variables['toxargs'] }} -- ${{ variables['pytest_flag'] }} ${{ variables['posargs'] }}
             displayName: Running tox
             ${{ if eq(variables.xvfb, 'true') }}:
               env:
