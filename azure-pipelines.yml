@@ -2,11 +2,13 @@ variables:
   CIBW_BUILD: cp38-*
   CIBW_BEFORE_BUILD_LINUX: "yum -y install fftw-devel; git clean -xfd -e wheelhouse"
   CIBW_BEFORE_BUILD_MACOS: "brew install fftw; git clean -xfd -e wheelhouse"
+  PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
 
 jobs:
 
 - template: run-tox-env.yml
   parameters:
+    cache_dir: $(PIP_CACHE_DIR)
     libraries:
       yum:
         - openssl-devel
