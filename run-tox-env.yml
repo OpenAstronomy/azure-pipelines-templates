@@ -88,6 +88,8 @@ jobs:
             displayName: Start up Docker container
 
         - ${{ if parameters.cache_dir }}:
+          - bash: mkdir ${{ parameters.cache_dir }}
+            displayName: Create cache directory
           - task: Cache@2
             inputs:
               key: '${{ parameters.cache_dir }}/*'
