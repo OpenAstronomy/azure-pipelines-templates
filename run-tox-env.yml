@@ -88,7 +88,7 @@ jobs:
             displayName: Start up Docker container
 
         - ${{ if parameters.cache_dir }}:
-          - bash: mkdir ${{ parameters.cache_dir }}
+          - bash: mkdir ${{ parameters.cache_dir }} && touch '${{ parameters.cache_dir }}/azure-template-empty-file'
             displayName: Create cache directory
           - task: Cache@2
             inputs:
