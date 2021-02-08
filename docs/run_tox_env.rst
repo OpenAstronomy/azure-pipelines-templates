@@ -255,6 +255,27 @@ underscore
 Which is why they are not automatically set from the tox env names, as they
 frequently have hyphens in.
 
+Caching
+-------
+Setting the ``cache_dir`` parameter will cache all files in the specified
+directory. If any of the files are updated or changed, the cache will be automatically
+updated and re-uploaded at the end of a run. For more information on how Azure manages caching, see
+`<https://docs.microsoft.com/en-us/azure/devops/pipelines/release/caching?view=azure-devops#using-the-cache-task>`__.
+
+As an example, to cache pip packages you can set the ``PIP_CACHE_DIR`` environment variable
+and cache this directory. This will ensure that ``pip`` uses this directory as the cache, and
+that it is cached by Azure:
+
+.. code:: yaml
+
+    variables:
+      PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
+
+    jobs:
+    - template: run-tox-env.yml@OpenAstronomy
+      parameters:
+        cache_dir: $(PIP_CACHE_DIR)
+
 
 Docker Jobs
 -----------
