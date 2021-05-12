@@ -25,6 +25,8 @@ jobs:
           os: 'linux'
         ${{ if not(or(eq(target, 'wheels_macos'), eq(target, 'wheels_linux'), eq(target, 'wheels_windows'))) }}:
           CIBW_BUILD: ${{ replace(target, 'wheels_', '') }}
+        ${{ if contains(target, 'aarch64') }}:
+          CIBW_ARCHS: aarch64
 
       pool:
         ${{ if eq(variables.os, 'macos') }}:
@@ -43,6 +45,10 @@ jobs:
           displayName: Install Python
         - bash: python -m pip install --upgrade pip execute-517
           displayName: Upgrading pip
+        - ${{ if contains(target, 'aarch64') }}:
+            - bash: |
+                docker run --rm --privileged hypriot/qemu-register
+              displayName: Registering qemu
         - ${{ if parameters.remove_local_scheme }}:
             - bash: |
                 version=$(execute-517 'setup.py --version' | tail -1 | cut -d '+' -f 1)

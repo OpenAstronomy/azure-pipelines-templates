@@ -72,7 +72,7 @@ jobs:
         pool:
           ${{ if eq(env_pair.key, 'macos') }}:
             vmImage: macos-latest
-          ${{ if startsWith(env_pair.key, 'linux') }}:
+          ${{ if or(startsWith(env_pair.key, 'linux'), eq(env_pair.key, 'manylinux')) }}:
             vmImage: ubuntu-latest
           ${{ if eq(env_pair.key, 'windows') }}:
             vmImage: windows-latest
