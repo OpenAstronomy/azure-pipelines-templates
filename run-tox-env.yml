@@ -182,15 +182,38 @@ jobs:
                 CONDA_BUILD_SYSROOT: /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
 
         - ${{ if eq(coalesce(env['coverage'], parameters.coverage), 'codecov') }}:
-          - task: Bash@3
-            inputs:
-              targetType: 'inline'
-              script: bash <(curl -s https://codecov.io/bash)
-            displayName: Running codecov
-            condition: succeededOrFailed()
-            ${{ if ne(variables.CODECOV_TOKEN, '') }}:
-              env:
-                CODECOV_TOKEN: $(CODECOV_TOKEN)
+          - ${{ if or(eq(env_pair.key, 'macos'), eq(env_pair.key, 'linux')) }}:
+            - task: Bash@3
+              inputs:
+                targetType: 'inline'
+                ${{ if eq(env_pair.key, 'macos') }}:
+                  script: |
+                    curl -Os https://uploader.codecov.io/latest/macos/codecov
+                    chmod +x codecov
+                    ./codecov
+                ${{ if eq(env_pair.key, 'linux') }}:
+                  script: |
+                    curl -Os https://uploader.codecov.io/latest/linux/codecov
+                    chmod +x codecov
+                    ./codecov
+              displayName: Running codecov
+              condition: succeededOrFailed()
+              ${{ if ne(variables.CODECOV_TOKEN, '') }}:
+                env:
+                  CODECOV_TOKEN: $(CODECOV_TOKEN)
+          - ${{ if eq(env_pair.key, 'windows') }}:
+            - task: PowerShell@2
+              inputs:
+                targetType: 'inline'
+                script: |
+                  $ProgressPreference = 'SilentlyContinue'
+                  Invoke-WebRequest -Uri https://uploader.codecov.io/latest/windows/codecov.exe -Outfile codecov.exe
+                  .\codecov.exe
+              displayName: Running codecov
+              condition: succeededOrFailed()
+              ${{ if ne(variables.CODECOV_TOKEN, '') }}:
+                env:
+                  CODECOV_TOKEN: $(CODECOV_TOKEN)
 
         - ${{ if eq(variables['pytest'], 'true') }}:
           - task: PublishTestResults@2
