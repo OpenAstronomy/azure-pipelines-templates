@@ -37,6 +37,12 @@ jobs:
             python: '3.8'
           ${{ if startsWith(env_pair.value, 'py39') }}:
             python: '3.9'
+          ${{ if startsWith(env_pair.value, 'py310') }}:
+            python: '3.10'
+          ${{ if startsWith(env_pair.value, 'py311') }}:
+            python: '3.11'
+          ${{ if startsWith(env_pair.value, 'py312') }}:
+            python: '3.12'
 
           # Docker and manylinux
           ${{ if eq(env_pair.key, 'linux32') }}:
