@@ -186,16 +186,13 @@ jobs:
             - task: Bash@3
               inputs:
                 targetType: 'inline'
-                ${{ if eq(env_pair.key, 'macos') }}:
-                  script: |
-                    curl -Os https://uploader.codecov.io/latest/macos/codecov
-                    chmod +x codecov
-                    ./codecov
-                ${{ if eq(env_pair.key, 'linux') }}:
-                  script: |
-                    curl -Os https://uploader.codecov.io/latest/linux/codecov
-                    chmod +x codecov
-                    ./codecov
+                script: |
+                  curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring --keyring trustedkeys.gpg --import
+                  curl -Os https://uploader.codecov.io/latest/${{ env_pair.key }}/codecov
+                  curl -Os https://uploader.codecov.io/latest/${{ env_pair.key }}/codecov.SHA256SUM
+                  curl -Os https://uploader.codecov.io/latest/${{ env_pair.key }}/codecov.SHA256SUM.sig
+                  gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
+                  shasum -a 256 -c codecov.SHA256SUM && chmod +x codecov && ./codecov
               displayName: Running codecov
               condition: succeededOrFailed()
               ${{ if ne(variables.CODECOV_TOKEN, '') }}:
@@ -207,8 +204,13 @@ jobs:
                 targetType: 'inline'
                 script: |
                   $ProgressPreference = 'SilentlyContinue'
+                  Invoke-WebRequest -Uri https://keybase.io/codecovsecurity/pgp_keys.asc -OutFile codecov.asc
+                  gpg.exe --import codecov.asc
                   Invoke-WebRequest -Uri https://uploader.codecov.io/latest/windows/codecov.exe -Outfile codecov.exe
-                  .\codecov.exe
+                  Invoke-WebRequest -Uri https://uploader.codecov.io/latest/windows/codecov.exe.SHA256SUM -Outfile codecov.exe.SHA256SUM
+                  Invoke-WebRequest -Uri https://uploader.codecov.io/latest/windows/codecov.exe.SHA256SUM.sig -Outfile codecov.exe.SHA256SUM.sig
+                  gpg.exe --verify codecov.exe.SHA256SUM.sig codecov.exe.SHA256SUM
+                  If ($(Compare-Object -ReferenceObject  $(($(certUtil -hashfile codecov.exe SHA256)[1], "codecov.exe") -join "  ") -DifferenceObject $(Get-Content codecov.exe.SHA256SUM)).length -eq 0) { .\codecov.exe } Else {exit 1}
               displayName: Running codecov
               condition: succeededOrFailed()
               ${{ if ne(variables.CODECOV_TOKEN, '') }}:
