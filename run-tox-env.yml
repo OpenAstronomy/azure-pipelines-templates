@@ -182,23 +182,27 @@ jobs:
                 CONDA_BUILD_SYSROOT: /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
 
         - ${{ if eq(coalesce(env['coverage'], parameters.coverage), 'codecov') }}:
-          - ${{ if or(eq(env_pair.key, 'macos'), eq(env_pair.key, 'linux')) }}:
+          - ${{ if or(eq(env_pair.key, 'macos'), startsWith(env_pair.key, 'linux'), eq(env_pair.key, 'manylinux')) }}:
             - task: Bash@3
               inputs:
                 targetType: 'inline'
                 script: |
                   curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring --keyring trustedkeys.gpg --import
-                  curl -Os https://uploader.codecov.io/latest/${{ env_pair.key }}/codecov
-                  curl -Os https://uploader.codecov.io/latest/${{ env_pair.key }}/codecov.SHA256SUM
-                  curl -Os https://uploader.codecov.io/latest/${{ env_pair.key }}/codecov.SHA256SUM.sig
+                  curl -Os https://uploader.codecov.io/latest/${OSNAME}/codecov
+                  curl -Os https://uploader.codecov.io/latest/${OSNAME}/codecov.SHA256SUM
+                  curl -Os https://uploader.codecov.io/latest/${OSNAME}/codecov.SHA256SUM.sig
                   gpgv codecov.SHA256SUM.sig codecov.SHA256SUM && \
                   shasum -a 256 -c codecov.SHA256SUM && \
                   chmod +x codecov && \
                   ./codecov
               displayName: Running codecov
               condition: succeededOrFailed()
-              ${{ if ne(variables.CODECOV_TOKEN, '') }}:
-                env:
+              env:
+                ${{ if eq(env_pair.key, 'macos') }}:
+                  OSNAME: macos
+                ${{ if or(startsWith(env_pair.key, 'linux'), eq(env_pair.key, 'manylinux')) }}:
+                  OSNAME: linux
+                ${{ if ne(variables.CODECOV_TOKEN, '') }}:
                   CODECOV_TOKEN: $(CODECOV_TOKEN)
           - ${{ if eq(env_pair.key, 'windows') }}:
             - task: PowerShell@2
