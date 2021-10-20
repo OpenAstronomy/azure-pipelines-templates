@@ -39,8 +39,9 @@ jobs:
 
 - template: publish.yml
   parameters:
-    artifact_project: azure-pipelines-templates
-    artifact_feed: testfeed
+    ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
+      artifact_project: azure-pipelines-templates
+      artifact_feed: testfeed
     remove_local_scheme: true
     libraries:
       - libfftw3-dev
