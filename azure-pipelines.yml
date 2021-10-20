@@ -49,6 +49,7 @@ jobs:
       - wheels_macos
       - wheels_cp3[78]-win_amd64
       - wheels_cp37-manylinux_x86_64
+      - wheels_cp37-manylinux_aarch64
       - sdist
 
 # - template: publish.yml
