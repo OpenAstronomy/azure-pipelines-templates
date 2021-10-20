@@ -42,7 +42,9 @@ jobs:
           submodules: ${{ coalesce(parameters.submodules, true) }}
           fetchDepth: 999999999
         - task: UsePythonVersion@0
-          displayName: Install Python
+          displayName: setup python3.9
+          inputs:
+            versionSpec: '3.9'
         - bash: python -m pip install --upgrade pip execute-517
           displayName: Upgrading pip
         - ${{ if contains(target, 'aarch64') }}:
@@ -96,9 +98,9 @@ jobs:
         submodules: ${{ coalesce(parameters.submodules, true) }}
         fetchDepth: 999999999
       - task: UsePythonVersion@0
-        displayName: setup python3.8
+        displayName: setup python3.9
         inputs:
-          versionSpec: '3.8'
+          versionSpec: '3.9'
       - ${{ each library in parameters.libraries }}:
         - script: sudo apt-get install -y ${{ library }}
           displayName: Installing ${{ library }} with apt
@@ -138,9 +140,9 @@ jobs:
         submodules: ${{ coalesce(parameters.submodules, true) }}
         fetchDepth: 999999999
       - task: UsePythonVersion@0
-        displayName: setup python3.8
+        displayName: setup python3.9
         inputs:
-          versionSpec: '3.8'
+          versionSpec: '3.9'
       - script: 'python -m pip install -U --force-reinstall build execute-517'
         displayName: "Install build tools"
       - ${{ if parameters.remove_local_scheme }}:
@@ -181,9 +183,9 @@ jobs:
     steps:
     - checkout: none
     - task: UsePythonVersion@0
-      displayName: setup python3.8
+      displayName: setup python3.9
       inputs:
-        versionSpec: '3.8'
+        versionSpec: '3.9'
     - script: 'python -m pip install -U --user --force-reinstall twine'
       displayName: "install twine"
     # Get all artifacts from this build
