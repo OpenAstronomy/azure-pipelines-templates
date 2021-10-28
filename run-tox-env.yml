@@ -195,7 +195,7 @@ jobs:
                   gpgv codecov.SHA256SUM.sig codecov.SHA256SUM && \
                   shasum -a 256 -c codecov.SHA256SUM && \
                   chmod +x codecov && \
-                  ./codecov
+                  ./codecov -n ${{ variables['friendly_name'] }}
               displayName: Running codecov
               condition: succeededOrFailed()
               env:
@@ -217,7 +217,7 @@ jobs:
                   Invoke-WebRequest -Uri https://uploader.codecov.io/latest/windows/codecov.exe.SHA256SUM -Outfile codecov.exe.SHA256SUM
                   Invoke-WebRequest -Uri https://uploader.codecov.io/latest/windows/codecov.exe.SHA256SUM.sig -Outfile codecov.exe.SHA256SUM.sig
                   gpg.exe --verify codecov.exe.SHA256SUM.sig codecov.exe.SHA256SUM
-                  If ($(Compare-Object -ReferenceObject  $(($(certUtil -hashfile codecov.exe SHA256)[1], "codecov.exe") -join "  ") -DifferenceObject $(Get-Content codecov.exe.SHA256SUM)).length -eq 0) { .\codecov.exe } Else {exit 1}
+                  If ($(Compare-Object -ReferenceObject  $(($(certUtil -hashfile codecov.exe SHA256)[1], "codecov.exe") -join "  ") -DifferenceObject $(Get-Content codecov.exe.SHA256SUM)).length -eq 0) { .\codecov.exe -n ${{ variables['friendly_name'] }} } Else {exit 1}
                 errorActionPreference: 'stop'
               displayName: Running codecov
               condition: succeededOrFailed()
