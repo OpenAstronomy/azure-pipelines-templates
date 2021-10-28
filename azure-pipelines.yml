@@ -1,5 +1,6 @@
 variables:
   CIBW_BUILD: cp38-*
+  CIBW_SKIP: "*-musl*"
   CIBW_BEFORE_BUILD_LINUX: "yum -y install fftw-devel; git clean -xfd -e wheelhouse"
   CIBW_BEFORE_BUILD_MACOS: "brew install fftw; git clean -xfd -e wheelhouse"
 
