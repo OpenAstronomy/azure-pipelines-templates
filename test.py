@@ -1,7 +1,12 @@
 import os
 import sys
+import subprocess
 
 import pytest
+
+BUILD_ID = os.environ['BUILD_BUILDID']
+assert isinstance(BUILD_ID, str) and len(BUILD_ID) > 0
+
 
 def test_32bit():
     if '32' in os.environ['ENVNAME']:
@@ -20,3 +25,36 @@ def test_opengl():
         assert len(version) > 0
     else:
          pytest.skip()
+
+
+@pytest.mark.skipif('cache-a' not in os.environ['ENVNAME'])
+@pytest.mark.parameterize('name,dir', [('data_x', 'cache_x'), ('data_y', 'cache_y')])
+def test_cache_a(name, dir):
+    filename = os.path.join(dir, 'test.txt')
+    if os.path.exists(filename):  # should be cached from previous build
+        with open(filename, 'r') as f:
+            assert f.readline().startswith(f'writing to {name} cache in')
+    else:  # probably first run or cleared cache
+        if not os.path.exists(os.path.dirname(filename)):
+            os.makedirs(os.path.dirname(filename))
+        subprocess.call(["echo", f"##vso[task.logissue type=warning;]Cached file {filename}"
+                                 f" was not restored from a previous build."])
+    with open(filename, 'w') as f:
+        f.write(f'writing to {name} cache in {BUILD_ID}:cache-a')
+
+
+@pytest.mark.skipif('cache-b' not in os.environ['ENVNAME'])
+@pytest.mark.parameterize('name,dir', [('data_x', 'cache_x'), ('data_y', 'cache_y')])
+def test_cache_b(name, dir):
+    with open(os.path.join(dir, 'test.txt'), 'r') as f:
+        assert f.readline() == f'writing to {name} cache in {BUILD_ID}:cache-a'
+    with open(os.path.join(dir, 'test.txt'), 'w') as f:
+        assert f.write(f'writing to {name} cache in {BUILD_ID}:cache-b')
+
+
+@pytest.mark.skipif('cache-c' not in os.environ['ENVNAME'])
+def test_cache_c():
+    with open(os.path.join('cache_x', 'test.txt'), 'r') as f:
+        assert f.readline() == f'writing to data_x cache in {BUILD_ID}:cache-b'
+    # data_z key should create cache unique to data_y key
+    assert not os.path.exists(os.path.join('cache_y', 'test.txt'))

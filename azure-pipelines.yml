@@ -38,6 +38,19 @@ jobs:
     - linux: testtoxargs
       toxargs: --notest
 
+- template: run-tox-env.yml
+  parameters:
+    cache_dirs:
+    - data_x: cache_x
+    - data_y: cache_y
+    envs:
+    - linux: py39-cache-a
+    - macos: py39-cache-b
+    - linux: py39-cache-c
+      cache_dirs:
+      - data_x: cache_x
+      - data_z: cache_y
+
 - template: publish.yml
   parameters:
     ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
