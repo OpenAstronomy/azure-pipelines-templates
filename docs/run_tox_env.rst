@@ -255,6 +255,93 @@ underscore
 Which is why they are not automatically set from the tox env names, as they
 frequently have hyphens in.
 
+Caching
+-------
+Setting the ``cache_dirs`` parameter will cache all files in the specified
+directories. If any of the files are updated or changed, the cache will be
+automatically updated and re-uploaded at the end of a run.
+The `Azure documentation
+<https://docs.microsoft.com/en-us/azure/devops/pipelines/release/caching?view=azure-devops#using-the-cache-task>`__
+contains more information on how Azure manages caching.
+
+A list of caches are defined according to the following specification.
+
+.. code:: yaml
+
+    jobs:
+    - template: run-tox-env.yml@OpenAstronomy
+      parameters:
+        cache_dirs:
+        - <cache name>: <cached directory>
+        - <cache name>: <cached directory>
+      envs:
+      - <os>: <tox env>
+        cache_dirs:
+        - <cache name>: <cached directory>
+        - <cache name>: <cached directory>
+
+
+All the files contained in the directory at the path specified by
+``<cached directory>`` will be cached. This can be an absolute or relative
+path, with relative paths based at ``$(System.DefaultWorkingDirectory)``,
+which is usually the directory containing your package's ``setup.py`` file.
+If this directory doesn't already exist, it will need to be created in your
+testing code before writing files to it.
+
+``<cache name>`` is the name of the cache.
+Every cache is identified by a ``<cache name>`` and a ``<cached directory>``.
+If either of these values are different, a new cache is created.
+This name will also appear in the list of Azure tasks.
+
+By defining ``cache_dirs`` under ``parameters``, the specified caches will be
+used for all ``envs``. However, if ``cache_dirs`` is specified under a specific
+environment, that environment will *only* use this set of caches.
+
+In the following example three directories are cached, ``data_directory``, ``pref``
+and ``out``. This examples has four unique caches, because it has four unique
+pairs of cache names and directories.
+
+The ``remote_data: data_directory``, ``preferences: pref`` and ``output: out``
+caches are defined globally, so will be available in all ``envs`` except ``macos``
+(i.e. ``linux`` and ``windows``) which has specified its own list of caches.
+As ``macos`` defines its own list of caches, it *only* has access to the
+``remote_data: data_directory`` and ``additional_preferences: pref`` caches.
+Note that ``preferences: pref`` and ``additional_preferences: pref`` are
+*different* caches, even though they are located at the same path.
+
+.. code:: yaml
+
+    jobs:
+    - template: run-tox-env.yml@OpenAstronomy
+      parameters:
+        cache_dirs:
+        - remote_data: data_directory
+        - preferences: pref
+        - output: out
+      envs:
+      - linux: py39
+      - macos: py38-extra
+        cache_dirs:
+        - remote_data: data_directory
+        - additional_preferences: pref
+      - windows: py38
+
+
+As an example, to cache pip packages you can set the ``PIP_CACHE_DIR`` environment variable
+and cache this directory. This will ensure that ``pip`` uses this directory as the cache, and
+that it is cached by Azure:
+
+.. code:: yaml
+
+    variables:
+      PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
+
+    jobs:
+    - template: run-tox-env.yml@OpenAstronomy
+      parameters:
+        cache_dirs:
+        - pip: $(PIP_CACHE_DIR)
+
 
 Docker Jobs
 -----------
