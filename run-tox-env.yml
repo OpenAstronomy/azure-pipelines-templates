@@ -93,6 +93,14 @@ jobs:
           - bash: docker run -v $PWD:/project -i --name ${{ variables.docker_name }} -d ${{ variables.docker_image }} /bin/bash
             displayName: Start up Docker container
 
+        - ${{ each cache_pair in coalesce(env['cache_dirs'], parameters.cache_dirs) }}:
+          - ${{ each cache_dir in cache_pair.value }}:
+            - task: Cache@2
+              inputs:
+                key: '"${{ cache_pair.key }}" | ${{ cache_dir }}/**'
+                path: ${{ cache_dir }}
+              displayName: Processing ${{ cache_pair.key }} cache
+
         - ${{ each tool_pair in coalesce(env['libraries'], parameters.libraries) }}:
           - ${{ each library in tool_pair.value }}:
 
