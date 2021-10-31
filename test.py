@@ -4,8 +4,13 @@ import subprocess
 
 import pytest
 
-BUILD_ID = os.environ['BUILD_BUILDID']
-assert isinstance(BUILD_ID, str) and len(BUILD_ID) > 0
+if 'cache' in os.environ['ENVNAME']:
+    import urllib.request, json
+    url = 'https://dev.azure.com/OpenAstronomy/azure-pipelines-templates/_apis/pipelines/1/runs'
+    data = urllib.request.urlopen(url).read()
+    json_data = json.loads(data)
+    BUILD_ID = str(json_data['value'][0]['id'])
+    subprocess.call(["echo", f"##vso[task.logdetail]Received BUILD_ID {BUILD_ID} from Azure API"])
 
 
 def test_32bit():
