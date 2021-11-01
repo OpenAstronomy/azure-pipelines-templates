@@ -90,7 +90,7 @@ jobs:
           fetchDepth: 999999999
 
         - ${{ if variables.docker_image }}:
-          - ${{ if env['docker_cache'] }}
+          - ${{ if env['docker_cache'] }}:
             - task: Cache@2
               displayName: Processing Docker cache
               inputs:
