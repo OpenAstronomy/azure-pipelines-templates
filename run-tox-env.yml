@@ -94,7 +94,7 @@ jobs:
             - task: Cache@2
               displayName: Processing Docker cache
               inputs:
-                key: 'docker | "${{ variables.docker_image }}" | "$(Agent.OS)" | cache'
+                key: 'docker | "$(Agent.OS)" | "${{ variables.docker_image }}"'
                 path: $(Pipeline.Workspace)/docker
                 cacheHitVar: CACHE_RESTORED
             - script: |
@@ -103,7 +103,7 @@ jobs:
               condition: and(not(canceled()), eq(variables.CACHE_RESTORED, 'true'))
             - script: |
                 mkdir -p $(Pipeline.Workspace)/docker
-                docker save -o $(Pipeline.Workspace)/docker/cache.tar cache
+                docker save -o $(Pipeline.Workspace)/docker/cache.tar ${{ variables.docker_image }}
               displayName: Docker save
               condition: and(not(canceled()), or(failed(), ne(variables.CACHE_RESTORED, 'true')))
           - bash: docker run -v $PWD:/project -i --name ${{ variables.docker_name }} -d ${{ variables.docker_image }} /bin/bash
