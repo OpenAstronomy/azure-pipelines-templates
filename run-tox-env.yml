@@ -102,6 +102,7 @@ jobs:
               displayName: Docker restore
               condition: and(not(canceled()), eq(variables.CACHE_RESTORED, 'true'))
             - script: |
+                docker pull ${{ variables.docker_image }}
                 mkdir -p $(Pipeline.Workspace)/docker
                 docker save -o $(Pipeline.Workspace)/docker/cache.tar ${{ variables.docker_image }}
               displayName: Docker save
