@@ -3,6 +3,7 @@ import sys
 
 import pytest
 
+
 def test_32bit():
     if '32' in os.environ['ENVNAME']:
         assert sys.maxsize == 2147483647
@@ -20,3 +21,21 @@ def test_opengl():
         assert len(version) > 0
     else:
          pytest.skip()
+
+
+@pytest.mark.skipif('cache-a' not in os.environ['ENVNAME'], reason='env not cache-a')
+@pytest.mark.parametrize('name,dir', [('data_x', 'cache_1'), ('data_y', 'cache_2')])
+def test_cache_a(name, dir):
+    assert not os.path.exists(dir)  # should be a cache miss
+    os.makedirs(dir)
+    with open(os.path.join(dir, 'test.txt'), 'w') as f:
+        f.write(f'writing to {name}:{dir} cache in cache-a')
+
+
+@pytest.mark.skipif('cache-b' not in os.environ['ENVNAME'], reason='env not cache-b')
+def test_cache_b():
+    assert not os.path.exists('cache_1')  # should be a cache miss
+    os.makedirs('cache_1')  # (to cache at end of job without failing)
+    assert not os.path.exists('cache_2')  # should not have loaded global cache
+    with open(os.path.join('cache_3', 'test.txt'), 'r') as f:  # should load from cache-a
+        assert f.readline() == f'writing to data_x:cache_1 cache in cache-a'

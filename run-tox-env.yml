@@ -90,8 +90,36 @@ jobs:
           fetchDepth: 999999999
 
         - ${{ if variables.docker_image }}:
+          - ${{ if env['docker_cache'] }}:
+            - task: Cache@2
+              displayName: Processing Docker cache
+              inputs:
+                key: 'docker | "$(Agent.OS)" | "${{ variables.docker_image }}"'
+                path: $(Pipeline.Workspace)/docker
+                cacheHitVar: CACHE_RESTORED
+            - script: |
+                docker load -i $(Pipeline.Workspace)/docker/cache.tar
+              displayName: Docker restore
+              condition: and(not(canceled()), eq(variables.CACHE_RESTORED, 'true'))
+            - script: |
+                docker pull ${{ variables.docker_image }}
+                mkdir -p $(Pipeline.Workspace)/docker
+                docker save -o $(Pipeline.Workspace)/docker/cache.tar ${{ variables.docker_image }}
+              displayName: Docker save
+              condition: and(not(canceled()), or(failed(), ne(variables.CACHE_RESTORED, 'true')))
           - bash: docker run -v $PWD:/project -i --name ${{ variables.docker_name }} -d ${{ variables.docker_image }} /bin/bash
             displayName: Start up Docker container
+
+        - ${{ if env['cache_dirs'] }}:
+          - ${{ each cache in env['cache_dirs'] }}:
+            - task: Cache@2
+              inputs: ${{ cache }}
+              displayName: Processing cache at ${{ cache['path'] }}
+        - ${{ elseif parameters.cache_dirs }}:
+          - ${{ each cache in parameters.cache_dirs }}:
+            - task: Cache@2
+              inputs: ${{ cache }}
+              displayName: Processing cache at ${{ cache['path'] }}
 
         - ${{ each tool_pair in coalesce(env['libraries'], parameters.libraries) }}:
           - ${{ each library in tool_pair.value }}:
