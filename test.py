@@ -35,6 +35,7 @@ def test_cache_a(name, dir):
 @pytest.mark.skipif('cache-b' not in os.environ['ENVNAME'], reason='env not cache-b')
 def test_cache_b():
     assert not os.path.exists('cache_1')  # should be a cache miss
+    os.makedirs('cache_1')  # (to cache at end of job without failing)
     assert not os.path.exists('cache_2')  # should not have loaded global cache
     with open(os.path.join('cache_3', 'test.txt'), 'r') as f:  # should load from cache-a
         assert f.readline() == f'writing to data_x:cache_1 cache in cache-a'

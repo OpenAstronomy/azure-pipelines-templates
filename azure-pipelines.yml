@@ -54,6 +54,7 @@ stages:
           docker_image: python:3.9.0rc1-slim-buster
           docker_python: /usr/local/bin/python
           docker_cache: true
+          cache_dirs: []
 
     - template: publish.yml
       parameters:
