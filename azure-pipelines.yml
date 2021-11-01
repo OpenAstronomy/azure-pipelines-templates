@@ -4,75 +4,91 @@ variables:
   CIBW_BEFORE_BUILD_LINUX: "yum -y install fftw-devel; git clean -xfd -e wheelhouse"
   CIBW_BEFORE_BUILD_MACOS: "brew install fftw; git clean -xfd -e wheelhouse"
 
-jobs:
+stages:
+  - stage: StageOneTests
+    displayName: Standard Tests
+    jobs:
 
-- template: run-tox-env.yml
-  parameters:
-    libraries:
-      yum:
-        - openssl-devel
-    envs:
-    - linux: py37-simple-linux
-      name: py37_simple_linux_custom_name
-    - linux32: py37-simple-linux32
-    - linux32: py38-simple-linux32
-    - manylinux: py37-simple-linux
-      manylinux_image: manylinux2014_x86_64
-    - linux: py39-simple-linux
-      docker_image: python:3.9.0rc1-slim-buster
-      docker_python: /usr/local/bin/python
-    - macos: py37-simple-macos
-    - windows: py37-simple-windows
-    - macos: compiler_macos_conda
+    - template: run-tox-env.yml
+      parameters:
+        libraries:
+          yum:
+            - openssl-devel
+        envs:
+        - linux: py37-simple-linux
+          name: py37_simple_linux_custom_name
+        - linux32: py37-simple-linux32
+        - linux32: py38-simple-linux32
+        - manylinux: py37-simple-linux
+          manylinux_image: manylinux2014_x86_64
+        - linux: py39-simple-linux
+          docker_image: python:3.9.0rc1-slim-buster
+          docker_python: /usr/local/bin/python
+        - macos: py37-simple-macos
+        - windows: py37-simple-windows
+        - macos: compiler_macos_conda
 
-- template: run-tox-env.yml
-  parameters:
-    mesaopengl: true
-    envs:
-    - macos: py37-opengl-macos
-    - windows: py37-opengl-windows
+    - template: run-tox-env.yml
+      parameters:
+        mesaopengl: true
+        envs:
+        - macos: py37-opengl-macos
+        - windows: py37-opengl-windows
 
-- template: run-tox-env.yml
-  parameters:
-    envs:
-    - linux: testtoxargs
-      toxargs: --notest
+    - template: run-tox-env.yml
+      parameters:
+        envs:
+        - linux: testtoxargs
+          toxargs: --notest
 
-- template: run-tox-env.yml
-  parameters:
-    cache_dirs:
-    - key: '"data_x" | "$(Build.BuildNumber)"'
-      path: cache_1
-    - key: '"data_y" | "$(Build.BuildNumber)"'
-      path: cache_2
-    envs:
-    - linux: py39-cache-a
-    - linux: py39-cache-b
-      cache_dirs:
-      - key: '"data_x" | "$(Build.BuildNumber)"'
-        path: cache_3
-      - key: '"data_z" | "$(Build.BuildNumber)"'
-        path: cache_1
-    - linux: py39-simple-linux
-      docker_image: python:3.9.0rc1-slim-buster
-      docker_python: /usr/local/bin/python
-      docker_cache: true
+    - template: run-tox-env.yml
+      parameters:
+        cache_dirs:
+        - key: '"data_x" | "$(Build.BuildNumber)"'
+          path: cache_1
+        - key: '"data_y" | "$(Build.BuildNumber)"'
+          path: cache_2
+        envs:
+        - linux: py39-cache-a
+        - linux: py39-simple-linux
+          docker_image: python:3.9.0rc1-slim-buster
+          docker_python: /usr/local/bin/python
+          docker_cache: true
 
-- template: publish.yml
-  parameters:
-    ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
-      artifact_project: azure-pipelines-templates
-      artifact_feed: testfeed
-    remove_local_scheme: true
-    libraries:
-      - libfftw3-dev
-    targets:
-      - wheels_linux
-      - wheels_macos
-      - wheels_cp3[78]-win_amd64
-      - wheels_cp37-manylinux_x86_64
-      - wheels_cp37-manylinux_aarch64
-      - sdist
+    - template: publish.yml
+      parameters:
+        ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
+          artifact_project: azure-pipelines-templates
+          artifact_feed: testfeed
+        remove_local_scheme: true
+        libraries:
+          - libfftw3-dev
+        targets:
+          - wheels_linux
+          - wheels_macos
+          - wheels_cp3[78]-win_amd64
+          - wheels_cp37-manylinux_x86_64
+          - wheels_cp37-manylinux_aarch64
+          - sdist
+
+  - stage: StageTwoTests
+    displayName: Cache Verification Tests
+    condition: succeeded()
+    jobs:
+    - template: run-tox-env.yml
+      parameters:
+        cache_dirs:
+        - key: '"data_x" | "$(Build.BuildNumber)"'
+          path: cache_1
+        - key: '"data_y" | "$(Build.BuildNumber)"'
+          path: cache_2
+        envs:
+        - linux: py39-cache-b
+          cache_dirs:
+          - key: '"data_x" | "$(Build.BuildNumber)"'
+            path: cache_3
+          - key: '"data_z" | "$(Build.BuildNumber)"'
+            path: cache_1
 
 # - template: publish.yml
 #   parameters:
