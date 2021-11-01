@@ -41,15 +41,22 @@ jobs:
 - template: run-tox-env.yml
   parameters:
     cache_dirs:
-    - data_x: cache_x
-    - data_y: cache_y
+    - key: '"data_x" | "$(Build.BuildNumber)"'
+      path: cache_1
+    - key: '"data_y" | "$(Build.BuildNumber)"'
+      path: cache_2
     envs:
     - linux: py39-cache-a
-    - macos: py39-cache-b
-    - linux: py39-cache-c
+    - linux: py39-cache-b
       cache_dirs:
-      - data_x: cache_x
-      - data_z: cache_y
+      - key: '"data_x" | "$(Build.BuildNumber)"'
+        path: cache_3
+      - key: '"data_z" | "$(Build.BuildNumber)"'
+        path: cache_1
+    - linux: py39-simple-linux
+      docker_image: python:3.9.0rc1-slim-buster
+      docker_python: /usr/local/bin/python
+      docker_cache: true
 
 - template: publish.yml
   parameters:

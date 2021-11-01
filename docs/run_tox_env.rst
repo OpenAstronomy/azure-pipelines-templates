@@ -258,13 +258,18 @@ frequently have hyphens in.
 Caching
 -------
 Setting the ``cache_dirs`` parameter will cache all files in the specified
-directories. If any of the files are updated or changed, the cache will be
-automatically updated and re-uploaded at the end of a run.
+directories. Caches are identified by a specified key. Once a cache is
+created with a particular key, it cannot be updated or replaced.
 The `Azure documentation
 <https://docs.microsoft.com/en-us/azure/devops/pipelines/release/caching?view=azure-devops#using-the-cache-task>`__
 contains more information on how Azure manages caching.
 
 A list of caches are defined according to the following specification.
+Each collection of mappings in the sequence under ``cache_dirs`` is passed to
+the ``input`` of a ``Cache@2`` Azure task.
+See the `Azure documentation
+<https://docs.microsoft.com/en-us/azure/devops/pipelines/release/caching?view=azure-devops#using-the-cache-task>`__
+for the full specification of ``input``.
 
 .. code:: yaml
 
@@ -272,60 +277,32 @@ A list of caches are defined according to the following specification.
     - template: run-tox-env.yml@OpenAstronomy
       parameters:
         cache_dirs:
-        - <cache name>: <cached directory>
-        - <cache name>: <cached directory>
+        - key: <cache name>
+          path: <cached directory>
+        - key: <cache name>
+          path: <cached directory>
       envs:
       - <os>: <tox env>
         cache_dirs:
-        - <cache name>: <cached directory>
-        - <cache name>: <cached directory>
+        - key: <cache name>
+          path: <cached directory>
+        - key: <cache name>
+          path: <cached directory>
 
 
-All the files contained in the directory at the path specified by
-``<cached directory>`` will be cached. This can be an absolute or relative
+Azure will look for a cache with the key ``<cache name>``.
+If it exists, it will be restored to the directory ``<cached directory>``.
+If it doesn't exist, at the end of the job the contents of
+``<cached directory>`` will be cached with the key ``<cache name>``
+and will be available for subsequent jobs.
+
+The path specified by ``<cached directory>`` can be an absolute or relative
 path, with relative paths based at ``$(System.DefaultWorkingDirectory)``,
 which is usually the directory containing your package's ``setup.py`` file.
-If this directory doesn't already exist, it will need to be created in your
-testing code before writing files to it.
-
-``<cache name>`` is the name of the cache.
-Every cache is identified by a ``<cache name>`` and a ``<cached directory>``.
-If either of these values are different, a new cache is created.
-This name will also appear in the list of Azure tasks.
 
 By defining ``cache_dirs`` under ``parameters``, the specified caches will be
 used for all ``envs``. However, if ``cache_dirs`` is specified under a specific
 environment, that environment will *only* use this set of caches.
-
-In the following example three directories are cached, ``data_directory``, ``pref``
-and ``out``. This examples has four unique caches, because it has four unique
-pairs of cache names and directories.
-
-The ``remote_data: data_directory``, ``preferences: pref`` and ``output: out``
-caches are defined globally, so will be available in all ``envs`` except ``macos``
-(i.e. ``linux`` and ``windows``) which has specified its own list of caches.
-As ``macos`` defines its own list of caches, it *only* has access to the
-``remote_data: data_directory`` and ``additional_preferences: pref`` caches.
-Note that ``preferences: pref`` and ``additional_preferences: pref`` are
-*different* caches, even though they are located at the same path.
-
-.. code:: yaml
-
-    jobs:
-    - template: run-tox-env.yml@OpenAstronomy
-      parameters:
-        cache_dirs:
-        - remote_data: data_directory
-        - preferences: pref
-        - output: out
-      envs:
-      - linux: py39
-      - macos: py38-extra
-        cache_dirs:
-        - remote_data: data_directory
-        - additional_preferences: pref
-      - windows: py38
-
 
 As an example, to cache pip packages you can set the ``PIP_CACHE_DIR`` environment variable
 and cache this directory. This will ensure that ``pip`` uses this directory as the cache, and
@@ -340,7 +317,11 @@ that it is cached by Azure:
     - template: run-tox-env.yml@OpenAstronomy
       parameters:
         cache_dirs:
-        - pip: $(PIP_CACHE_DIR)
+        - key: 'python | "$(Agent.OS)" | requirements.txt'
+          restoreKeys: |
+            python | "$(Agent.OS)"
+            python
+          path: $(PIP_CACHE_DIR)
 
 
 Docker Jobs
@@ -390,9 +371,11 @@ The following example shows all the possible options even though some are redund
           docker_image: python:3.9.0rc1-slim-buster
           docker_name: python39
           docker_python: /usr/local/bin/python
+          docker_cache: true
 
 The options are as follows:
 
 * ``docker_image`` this is the name of the container to be created. It can be any valid argument to ``docker pull``, i.e ``python`` or ``quay.io/pypa/manylinux2010_i686``.
 * ``docker_name`` this is optional as long as ``docker_image`` is a valid container name. If you specify a tag in ``docker_image`` ``:`` and ``/`` will be replaced, so you will not need to specify ``docker_name``. However, if you specify a more complex image you will need to manually specify the container name with ``docker_name``.
 * ``docker_python`` this is the path inside the container to the docker executable.
+* ``docker_cache`` this enables caching of ``docker_image``. This is optional and default is no caching.

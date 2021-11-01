@@ -90,25 +90,35 @@ jobs:
           fetchDepth: 999999999
 
         - ${{ if variables.docker_image }}:
+          - ${{ if env['docker_cache'] }}
+            - task: Cache@2
+              displayName: Processing Docker cache
+              inputs:
+                key: 'docker | "${{ variables.docker_image }}" | "$(Agent.OS)" | cache'
+                path: $(Pipeline.Workspace)/docker
+                cacheHitVar: CACHE_RESTORED
+            - script: |
+                docker load -i $(Pipeline.Workspace)/docker/cache.tar
+              displayName: Docker restore
+              condition: and(not(canceled()), eq(variables.CACHE_RESTORED, 'true'))
+            - script: |
+                mkdir -p $(Pipeline.Workspace)/docker
+                docker save -o $(Pipeline.Workspace)/docker/cache.tar cache
+              displayName: Docker save
+              condition: and(not(canceled()), or(failed(), ne(variables.CACHE_RESTORED, 'true')))
           - bash: docker run -v $PWD:/project -i --name ${{ variables.docker_name }} -d ${{ variables.docker_image }} /bin/bash
             displayName: Start up Docker container
 
         - ${{ if env['cache_dirs'] }}:
           - ${{ each cache in env['cache_dirs'] }}:
-            - ${{ each cache_pair in cache }}:
-              - task: Cache@2
-                inputs:
-                  key: '"${{ cache_pair.key }}"'
-                  path: ${{ cache_pair.value }}
-                displayName: Processing ${{ cache_pair.key }} cache
+            - task: Cache@2
+              inputs: ${{ cache }}
+              displayName: Processing cache at ${{ cache['path'] }}
         - ${{ elseif parameters.cache_dirs }}:
           - ${{ each cache in parameters.cache_dirs }}:
-            - ${{ each cache_pair in cache }}:
-              - task: Cache@2
-                inputs:
-                  key: '"${{ cache_pair.key }}"'
-                  path: ${{ cache_pair.value }}
-                displayName: Processing ${{ cache_pair.key }} cache
+            - task: Cache@2
+              inputs: ${{ cache }}
+              displayName: Processing cache at ${{ cache['path'] }}
 
         - ${{ each tool_pair in coalesce(env['libraries'], parameters.libraries) }}:
           - ${{ each library in tool_pair.value }}:
