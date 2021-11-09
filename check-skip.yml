@@ -1,0 +1,19 @@
+parameters:
+- name: commands
+  type: string
+  default: ''
+
+jobs:
+- job: check_skip
+  steps:
+  - checkout: self
+    path: s/self
+  - checkout: OpenAstronomy
+    path: s/azure-pipelines-templates
+  - bash: $(Pipeline.Workspace)/s/azure-pipelines-templates/check-skip.sh
+    workingDirectory: $(Pipeline.Workspace)/s/self
+    displayName: search
+    env:
+      COMMIT_MESSAGE: $(Build.SourceVersionMessage)
+      ${{ if parameters.commands }}:
+        SKIP_COMMANDS: ${{ parameters.commands }}
