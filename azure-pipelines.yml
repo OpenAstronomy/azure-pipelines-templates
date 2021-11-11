@@ -26,7 +26,7 @@ stages:
           docker_python: /usr/local/bin/python
         - macos: py37-simple-macos
         - windows: py37-simple-windows
-        - macos: compiler_macos_conda
+        - macos: py39-compiler_macos_conda
 
     - template: run-tox-env.yml
       parameters:
