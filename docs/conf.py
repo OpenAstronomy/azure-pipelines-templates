@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'OpenAstronomy Azure Pipeline Templates'
-copyright = '2020, OpenAstronomy developers'
+copyright = '2021, OpenAstronomy developers'
 author = 'OpenAstronomy developers'
 
 
