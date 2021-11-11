@@ -6,14 +6,18 @@ parameters:
 jobs:
 - job: check_skip
   steps:
-  - checkout: self
-    path: s/self
-  - checkout: OpenAstronomy
-    path: s/azure-pipelines-templates
-  - bash: $(Pipeline.Workspace)/s/azure-pipelines-templates/check-skip.sh
-    workingDirectory: $(Pipeline.Workspace)/s/self
-    name: search
-    env:
-      COMMIT_MESSAGE: $(Build.SourceVersionMessage)
-      ${{ if parameters.commands }}:
-        SKIP_COMMANDS: ${{ parameters.commands }}
+  - ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
+    - checkout: self
+      path: s/self
+    - checkout: OpenAstronomy
+      path: s/azure-pipelines-templates
+    - bash: $(Pipeline.Workspace)/s/azure-pipelines-templates/check-skip.sh
+      workingDirectory: $(Pipeline.Workspace)/s/self
+      name: search
+      env:
+        COMMIT_MESSAGE: $(Build.SourceVersionMessage)
+        ${{ if parameters.commands }}:
+          SKIP_COMMANDS: ${{ parameters.commands }}
+  - ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
+    - bash: echo "##vso[task.setvariable variable=found;isOutput=true]false"
+      name: search
