@@ -5,6 +5,8 @@ parameters:
 
 jobs:
 - job: check_skip
+  pool:
+    vmImage: ubuntu-latest
   steps:
   - ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
     - checkout: self
