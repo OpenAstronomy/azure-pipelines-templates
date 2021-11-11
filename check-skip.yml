@@ -12,7 +12,7 @@ jobs:
     path: s/azure-pipelines-templates
   - bash: $(Pipeline.Workspace)/s/azure-pipelines-templates/check-skip.sh
     workingDirectory: $(Pipeline.Workspace)/s/self
-    displayName: search
+    name: search
     env:
       COMMIT_MESSAGE: $(Build.SourceVersionMessage)
       ${{ if parameters.commands }}:
