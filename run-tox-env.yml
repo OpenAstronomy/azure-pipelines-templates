@@ -123,12 +123,18 @@ jobs:
 
         - ${{ if env['libraries'] }}:
           - template: install-libraries.yml
-            libraries: env['libraries']
-            env_key: env_pair.key
+            parameters:
+              libraries: ${{ env['libraries'] }}
+              env_key: ${{ env_pair.key }}
+              docker_name: ${{ variables.docker_name }}
+              setarch: ${{ variables.setarch }}
         - ${{ elseif parameters.libraries }}:
           - template: install-libraries.yml
-            libraries: parameters.libraries
-            env_key: env_pair.key
+            parameters:
+              libraries: ${{ parameters.libraries }}
+              env_key: ${{ env_pair.key }}
+              docker_name: ${{ variables.docker_name }}
+              setarch: ${{ variables.setarch }}
 
         - ${{ if not(variables.docker_image) }}:
           - task: UsePythonVersion@0

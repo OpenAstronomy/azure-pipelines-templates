@@ -1,29 +1,37 @@
 parameters:
-- name: libraries
-  default: []
-- name: env_key
+- name: 'libraries'
+  type: object
+  default: {}
+- name: 'env_key'
+  type: string
+  default: ''
+- name: 'docker_name'
+  type: string
+  default: ''
+- name: 'setarch'
+  type: string
   default: ''
 
 steps:
 - ${{ each tool_pair in parameters.libraries }}:
   - ${{ each library in tool_pair.value }}:
 
-    - ${{ if and(eq(tool_pair.key, 'brew'), eq(env_key, 'macos')) }}:
+    - ${{ if and(eq(tool_pair.key, 'brew'), eq(parameters.env_key, 'macos')) }}:
       - script: brew install ${{ library }}
         displayName: Installing ${{ library }} with brew
 
-    - ${{ if and(eq(tool_pair.key, 'brew-cask'), eq(env_key, 'macos')) }}:
+    - ${{ if and(eq(tool_pair.key, 'brew-cask'), eq(parameters.env_key, 'macos')) }}:
       - script: brew cask install ${{ library }}
         displayName: Installing ${{ library }} with brew cask
 
-    - ${{ if and(eq(tool_pair.key, 'apt'), eq(env_key, 'linux')) }}:
+    - ${{ if and(eq(tool_pair.key, 'apt'), eq(parameters.env_key, 'linux')) }}:
       - script: sudo apt-get install -y ${{ library }}
         displayName: Installing ${{ library }} with apt
 
-    - ${{ if and(eq(tool_pair.key, 'yum'), or(eq(env_key, 'linux32'), eq(env_key, 'manylinux'))) }}:
-      - script: docker exec -i -w /project ${{ variables.docker_name }} ${{ variables.setarch }} yum install -y ${{ library }}
+    - ${{ if and(eq(tool_pair.key, 'yum'), or(eq(parameters.env_key, 'linux32'), eq(parameters.env_key, 'manylinux'))) }}:
+      - script: docker exec -i -w /project ${{ parameters.docker_name }} ${{ parameters.setarch }} yum install -y ${{ library }}
         displayName: Installing ${{ library }} with yum
 
-    - ${{ if and(eq(tool_pair.key, 'choco'), eq(env_key, 'windows')) }}:
+    - ${{ if and(eq(tool_pair.key, 'choco'), eq(parameters.env_key, 'windows')) }}:
       - script: choco install ${{ library }}
         displayName: Installing ${{ library }} with choco
