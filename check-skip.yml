@@ -13,7 +13,7 @@ jobs:
       - bash: |
           QUERY="repos/$BUILD_REPOSITORY_NAME/pulls/$SYSTEM_PULLREQUEST_PULLREQUESTNUMBER"
           KEY=".head.repo.clone_url"
-          FORK_URL=$(curl -H "Accept: application/vnd.github.v3+json" "https://api.github.com/$QUERY" | jq "$KEY")
+          FORK_URL=$(curl -H "Accept: application/vnd.github.v3+json" "https://api.github.com/$QUERY" | jq -r "$KEY")
           git clone "$FORK_URL" "$(Pipeline.Workspace)/s/self"
         displayName: Checkout fork to s/self
     - ${{ else }}:
