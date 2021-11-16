@@ -9,8 +9,16 @@ jobs:
     vmImage: ubuntu-latest
   steps:
   - ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
-    - checkout: self
-      path: s/self
+    - ${{ if eq(variables['System.PullRequest.IsFork'], 'True') }}:
+      - bash: |
+          QUERY="repos/$BUILD_REPOSITORY_NAME/pulls/$SYSTEM_PULLREQUEST_PULLREQUESTNUMBER"
+          KEY=".head.repo.clone_url"
+          FORK_URL=$(curl -H "Accept: application/vnd.github.v3+json" "https://api.github.com/$QUERY" | jq "$KEY")
+          git clone "$FORK_URL" "$(Pipeline.Workspace)/s/self"
+        displayName: Checkout fork to s/self
+    - ${{ else }}:
+      - checkout: self
+        path: s/self
     - checkout: OpenAstronomy
       path: s/azure-pipelines-templates
     - bash: $(Pipeline.Workspace)/s/azure-pipelines-templates/check-skip.sh
