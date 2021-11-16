@@ -9,6 +9,8 @@ jobs:
     vmImage: ubuntu-latest
   steps:
   - ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
+    - checkout: OpenAstronomy
+      path: s/azure-pipelines-templates
     - ${{ if eq(variables['System.PullRequest.IsFork'], 'True') }}:
       - bash: |
           QUERY="repos/$BUILD_REPOSITORY_NAME/pulls/$SYSTEM_PULLREQUEST_PULLREQUESTNUMBER"
@@ -19,8 +21,6 @@ jobs:
     - ${{ else }}:
       - checkout: self
         path: s/self
-    - checkout: OpenAstronomy
-      path: s/azure-pipelines-templates
     - bash: $(Pipeline.Workspace)/s/azure-pipelines-templates/check-skip.sh
       workingDirectory: $(Pipeline.Workspace)/s/self
       name: search
