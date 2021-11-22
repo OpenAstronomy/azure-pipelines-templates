@@ -72,6 +72,10 @@ get_commit_hash () {
 
 get_commit_message () {
   require_argument commit_hash "$1"
+  if [[ -n "$PR_NUMBER" ]]; then
+    echo "Fetching fork at PR #$PR_NUMBER"
+    git fetch origin "refs/pull/$PR_NUMBER/head"
+  fi
   MSG=$(git log --format=%B -n 1 "$1")
   if [ $? -ne 0 ]; then
     echo "Error running: git log --format=%B -n 1 $1" 1>&2
