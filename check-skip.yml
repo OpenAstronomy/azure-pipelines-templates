@@ -20,6 +20,8 @@ jobs:
         COMMIT_MESSAGE: $(Build.SourceVersionMessage)
         ${{ if parameters.commands }}:
           SKIP_COMMANDS: ${{ parameters.commands }}
+        ${{ if eq(variables['System.PullRequest.IsFork'], 'True') }}:
+          PR_NUMBER: $(System.PullRequest.PullRequestNumber)
   - ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
     - bash: echo "##vso[task.setvariable variable=found;isOutput=true]false"
       name: search
