@@ -99,7 +99,8 @@ This default list can be replaced as shown in the following code.
     - stage: StageOne
       jobs:
       - template: check-skip.yml@OpenAstronomy
-        commands: '"[skip ci]" "[ci skip]" noci'
+        parameters:
+          commands: '"[skip ci]" "[ci skip]" noci'
 
 This will configure the check to only recognise ``[skip ci]``, ``[ci skip]``
 and ``noci`` as valid skip commands.
