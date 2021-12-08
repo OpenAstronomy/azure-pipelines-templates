@@ -43,6 +43,18 @@ stages:
 
     - template: run-tox-env.yml
       parameters:
+        libraries:
+          apt:
+          - rolldice
+        envs:
+        - linux: global_libraries
+        - linux: env_libraries
+          libraries:
+            apt:
+            - bcal
+
+    - template: run-tox-env.yml
+      parameters:
         cache_dirs:
         - key: '"data_x" | "$(Build.BuildNumber)"'
           path: cache_1
