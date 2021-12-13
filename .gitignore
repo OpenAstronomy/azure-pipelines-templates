@@ -1,4 +1,4 @@
-### Python: https://raw.githubusercontent.com/github/gitignore/master/Python.gitignore
+### Python: https://raw.githubusercontent.com/github/gitignore/main/Python.gitignore
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -108,7 +108,7 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-### https://raw.github.com/github/gitignore/master/Global/OSX.gitignore
+### https://raw.github.com/github/gitignore/main/Global/OSX.gitignore
 
 .DS_Store
 .AppleDouble
@@ -125,7 +125,7 @@ Icon
 .Spotlight-V100
 .Trashes
 
-### Linux: https://raw.githubusercontent.com/github/gitignore/master/Global/Linux.gitignore
+### Linux: https://raw.githubusercontent.com/github/gitignore/main/Global/Linux.gitignore
 
 *~
 
@@ -141,7 +141,7 @@ Icon
 # .nfs files are created when an open file is removed but is still being accessed
 .nfs*
 
-### MacOS: https://raw.githubusercontent.com/github/gitignore/master/Global/macOS.gitignore
+### MacOS: https://raw.githubusercontent.com/github/gitignore/main/Global/macOS.gitignore
 
 # General
 .DS_Store
@@ -171,7 +171,7 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-### Windows: https://raw.githubusercontent.com/github/gitignore/master/Global/Windows.gitignore
+### Windows: https://raw.githubusercontent.com/github/gitignore/main/Global/Windows.gitignore
 
 # Windows thumbnail cache files
 Thumbs.db
@@ -197,7 +197,7 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-### VScode: https://raw.githubusercontent.com/github/gitignore/master/Global/VisualStudioCode.gitignore
+### VScode: https://raw.githubusercontent.com/github/gitignore/main/Global/VisualStudioCode.gitignore
 .vscode/*
 
 ### Extra Python Items and SunPy Specific
