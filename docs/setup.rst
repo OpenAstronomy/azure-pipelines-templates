@@ -8,7 +8,7 @@ want to find out about how to use the templates, you can jump ahead to
 Before we start setting up Azure Pipelines, we need to make sure that an
 ``azure-pipelines.yml`` file exists somewhere in the main (upstream) repository
 you are setting up. This can be problematic in that you may not want to add a
-configuration file to your ``master`` branch until you know it works properly.
+configuration file to your default branch until you know it works properly.
 Instead, you will likely want to create the configuration file in a branch of
 your fork, and then iterate on it in a pull request to your main repository.
 

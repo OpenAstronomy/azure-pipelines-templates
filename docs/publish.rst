@@ -200,14 +200,14 @@ If you want to make this feed public, so that unauthenticated users can access i
 To upload to Azure Artifacts rather than PyPI, you specify the ``artifact_feed`` and ``artifact_project`` variables instead of ``pypi_connection_name``.
 
 
-If you wish to upload on all builds on master you would add a section to the ``publish.yml`` config which looks like:
+If you wish to upload on all builds on the branch ``main`` you would add a section to the ``publish.yml`` config which looks like:
 
 .. code:: yaml
 
     jobs:
     - template: publish.yml@OpenAstronomy
       parameters:
-        ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
+        ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
           artifact_project : 'projectname'
           artifact_feed : 'feedname'
         ...
@@ -255,7 +255,7 @@ Using this your config block would look like:
     jobs:
     - template: publish.yml@OpenAstronomy
       parameters:
-        ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
+        ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
           artifact_project : 'projectname'
           artifact_feed : 'feedname'
           remove_local_scheme: true

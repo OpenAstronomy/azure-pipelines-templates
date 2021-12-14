@@ -26,10 +26,14 @@ To load the template, add the following to the beginning of the ``azure-pipeline
         type: github
         endpoint: <service connection name>
         name: OpenAstronomy/azure-pipelines-templates
-        ref: master
 
 where ``<service connection name>`` is the name of the service connection you
 set up above. This will make the templates in this repository available in the
-``OpenAstronomy`` namespace in the rest of the file. Note the ref allows you to
-pin the template version you want, you can use ``master`` if you want the latest
-version.
+``OpenAstronomy`` namespace in the rest of the file.
+
+.. note::
+   Specifying the ``ref`` property for the ``OpenAstronomy`` repository is not
+   recommended because the default branch of the ``azure-pipelines-templates``
+   repository may change in the future.
+   `Azure Pipelines will use the current default branch when a ref is not specified.
+   <https://docs.microsoft.com/en-us/azure/devops/pipelines/repos/multi-repo-checkout?view=azure-devops#checking-out-a-specific-ref>`__
