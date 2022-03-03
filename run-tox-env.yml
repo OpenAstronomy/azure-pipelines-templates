@@ -182,7 +182,7 @@ jobs:
               conda install --yes --quiet --name testenv python=${{ variables.python }} pip
             displayName: Create and activate conda env
 
-          - script: python -m pip install --upgrade 'tox-conda!=0.8.0' ${{ variables.toxdeps }}
+          - bash: python -m pip install --upgrade 'tox-conda!=0.8.0' ${{ variables.toxdeps }}
             displayName: install tox-conda
 
         - ${{ if variables.docker_image }}:
