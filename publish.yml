@@ -7,7 +7,7 @@ jobs:
 
   - ${{ if and(startsWith(target, 'wheels_'),ne(target, 'wheels_universal')) }}:
 
-    - job: ${{ replace(replace(replace(replace(replace(replace(target, '?', ''), '*', ''), '[', ''), ']', ''), '!', ''), '-', '_') }}
+    - job: ${{ replace(replace(replace(replace(replace(replace(replace(replace(replace(target, '?', ''), '*', ''), '[', ''), ']', ''), '!', ''), '-', '_'), '{', ''), '}', ''), ',', '') }}
       displayName: ${{ target }}
       dependsOn: ${{ parameters.dependsOn }}
       condition: succeeded()
@@ -16,7 +16,7 @@ jobs:
         CIBW_TEST_COMMAND: ${{ parameters.test_command }}
         CIBW_TEST_EXTRAS: ${{ parameters.test_extras }}
         OA_TARGET: ${{ target }}
-        job_name: ${{ replace(replace(replace(replace(replace(replace(target, '?', ''), '*', ''), '[', ''), ']', ''), '!', ''), '-', '_') }}
+        job_name: ${{ replace(replace(replace(replace(replace(replace(replace(replace(replace(target, '?', ''), '*', ''), '[', ''), ']', ''), '!', ''), '-', '_'), '{', ''), '}', ''), ',', '') }}
         ${{ if contains(target, 'macos') }}:
           os: 'macos'
         ${{ if contains(target, 'win') }}:
@@ -173,7 +173,7 @@ jobs:
 
     dependsOn:
     - ${{ each target in parameters.targets }}:
-      - ${{ replace(replace(replace(replace(replace(replace(target, '?', ''), '*', ''), '[', ''), ']', ''), '!', ''), '-', '_') }}
+      - ${{ replace(replace(replace(replace(replace(replace(replace(replace(replace(target, '?', ''), '*', ''), '[', ''), ']', ''), '!', ''), '-', '_'), '{', ''), '}', ''), ',', '') }}
 
     condition: succeeded()
 
@@ -195,7 +195,7 @@ jobs:
           inputs:
             buildType: 'current'
             targetPath: 'wheelhouse'
-            artifactName: ${{ replace(replace(replace(replace(replace(replace(target, '?', ''), '*', ''), '[', ''), ']', ''), '!', ''), '-', '_') }}
+            artifactName: ${{ replace(replace(replace(replace(replace(replace(replace(replace(replace(target, '?', ''), '*', ''), '[', ''), ']', ''), '!', ''), '-', '_'), '{', ''), '}', ''), ',', '') }}
 
     - script: 'ls -R wheelhouse'
       displayName: "List files for upload"
