@@ -144,7 +144,7 @@ jobs:
 
         - ${{ if eq(variables.mesaopengl, 'true') }}:
 
-          - bash: git clone --depth 1 git://github.com/vtkiorg/gl-ci-helpers.git
+          - bash: git clone --depth 1 https://github.com/vtkiorg/gl-ci-helpers.git
             displayName: Getting OpenGL helper script
 
           - powershell: gl-ci-helpers\appveyor\install_opengl.ps1
