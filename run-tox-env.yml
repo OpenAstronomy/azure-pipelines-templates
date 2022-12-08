@@ -196,7 +196,7 @@ jobs:
 
         - ${{ if not(variables.docker_image) }}:
           
-          - script: python -m pip install 'tox ${{ variables.toxverspec }}' ${{ variables.toxdeps }}
+          - script: python -m pip install 'tox${{ variables.toxverspec }}' ${{ variables.toxdeps }}
             displayName: Install tox
 
           - script: python -m tox -e ${{ env_pair.value }} ${{ variables['toxargs'] }} -- ${{ variables['pytest_flag'] }} ${{ variables['posargs'] }}
