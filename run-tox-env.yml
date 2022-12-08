@@ -186,17 +186,25 @@ jobs:
             displayName: install tox-conda
 
         - ${{ if variables.docker_image }}:
-
-          - script: docker exec -i -w /project ${{ variables.docker_name }} ${{ variables.setarch }} ${{ variables.docker_python_exec }} -m pip install --upgrade tox${{ variables.toxverspec }} ${{ variables.toxdeps }}
-            displayName: Install tox
+          - ${{ if not(eq(variables.toxverspec, '')) }}:
+            - script: docker exec -i -w /project ${{ variables.docker_name }} ${{ variables.setarch }} ${{ variables.docker_python_exec }} -m pip install tox${{ variables.toxverspec }} ${{ variables.toxdeps }}
+              displayName: Install tox
+          
+          - ${{ if eq(variables.toxverspec, '') }}:
+            - script: docker exec -i -w /project ${{ variables.docker_name }} ${{ variables.setarch }} ${{ variables.docker_python_exec }} -m pip install --upgrade tox ${{ variables.toxdeps }}
+              displayName: Install tox
 
           - script: docker exec -i -w /project ${{ variables.docker_name }} ${{ variables.setarch }} ${{ variables.docker_python_exec }} -m tox -e ${{ env_pair.value }} ${{ variables['toxargs'] }} -- ${{ variables['pytest_flag'] }} ${{ variables['posargs'] }}
             displayName: Running tox
 
         - ${{ if not(variables.docker_image) }}:
-
-          - script: python -m pip install --upgrade tox${{ variables.toxverspec }} ${{ variables.toxdeps }}
-            displayName: Install tox
+          - ${{ if not(eq(variables.toxverspec, '')) }}:
+            - script: python -m pip install tox${{ variables.toxverspec }} ${{ variables.toxdeps }}
+              displayName: Install tox
+          
+          - ${{ if eq(variables.toxverspec, '') }}:
+            - script: python -m pip install --upgrade tox ${{ variables.toxdeps }}
+              displayName: Install tox
 
           - script: python -m tox -e ${{ env_pair.value }} ${{ variables['toxargs'] }} -- ${{ variables['pytest_flag'] }} ${{ variables['posargs'] }}
             displayName: Running tox
