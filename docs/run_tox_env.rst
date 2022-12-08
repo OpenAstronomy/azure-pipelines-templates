@@ -85,6 +85,23 @@ with these tools, e.g:
 Note that as shown above, you don't need to specify all tools, only the ones for
 which you need to install packages.
 
+Tox Version
+---------------------------
+
+If you need to you you can add a tox version specifier eg. ``>=1`` or ``==3.2.1``
+, by defaul the most recent version is installed. This can be done via the
+``toxverspec`` parameter.
+
+.. code:: yaml
+
+    jobs:
+
+    - template: run-tox-env.yml@OpenAstronomy
+      parameters:
+        toxverspec: <4
+        envs:
+        - ...
+
 Pre-Tox Python dependencies
 ---------------------------
 

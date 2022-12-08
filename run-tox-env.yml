@@ -14,6 +14,7 @@ jobs:
         variables:
           friendly_name: '${{ coalesce(env.name, env_pair.value) }} [${{ env_pair.key }}]'
           posargs: ${{ coalesce(env['posargs'], parameters.posargs) }}
+          toxverspec: ${{ coalesce(env['toxverspec'], parameters.toxverspec, '') }}
           toxdeps: ${{ coalesce(env['toxdeps'], parameters.toxdeps) }}
           toxargs: ${{ coalesce(env['toxargs'], parameters.toxargs) }}
           xvfb: ${{ and(coalesce(env['xvfb'], parameters.xvfb, false), eq(env_pair.key, 'linux')) }}
@@ -143,7 +144,7 @@ jobs:
 
         - ${{ if eq(variables.mesaopengl, 'true') }}:
 
-          - bash: git clone --depth 1 git://github.com/vtkiorg/gl-ci-helpers.git
+          - bash: git clone --depth 1 https://github.com/vtkiorg/gl-ci-helpers.git
             displayName: Getting OpenGL helper script
 
           - powershell: gl-ci-helpers\appveyor\install_opengl.ps1
@@ -187,7 +188,7 @@ jobs:
 
         - ${{ if variables.docker_image }}:
 
-          - script: docker exec -i -w /project ${{ variables.docker_name }} ${{ variables.setarch }} ${{ variables.docker_python_exec }} -m pip install --upgrade tox ${{ variables.toxdeps }}
+          - script: docker exec -i -w /project ${{ variables.docker_name }} ${{ variables.setarch }} ${{ variables.docker_python_exec }} -m pip install --upgrade "tox ${{ variables.toxverspec }}" ${{ variables.toxdeps }}
             displayName: Install tox
 
           - script: docker exec -i -w /project ${{ variables.docker_name }} ${{ variables.setarch }} ${{ variables.docker_python_exec }} -m tox -e ${{ env_pair.value }} ${{ variables['toxargs'] }} -- ${{ variables['pytest_flag'] }} ${{ variables['posargs'] }}
@@ -195,7 +196,7 @@ jobs:
 
         - ${{ if not(variables.docker_image) }}:
 
-          - script: python -m pip install --upgrade tox ${{ variables.toxdeps }}
+          - script: python -m pip install "tox${{ variables.toxverspec }}" ${{ variables.toxdeps }}
             displayName: Install tox
 
           - script: python -m tox -e ${{ env_pair.value }} ${{ variables['toxargs'] }} -- ${{ variables['pytest_flag'] }} ${{ variables['posargs'] }}
