@@ -15,6 +15,7 @@ jobs:
           friendly_name: '${{ coalesce(env.name, env_pair.value) }} [${{ env_pair.key }}]'
           posargs: ${{ coalesce(env['posargs'], parameters.posargs) }}
           toxverspec: ${{ coalesce(env['toxverspec'], parameters.toxverspec, '') }}
+          toxdeps: ${{ coalesce(env['toxdeps'], parameters.toxdeps) }}
           toxargs: ${{ coalesce(env['toxargs'], parameters.toxargs) }}
           xvfb: ${{ and(coalesce(env['xvfb'], parameters.xvfb, false), eq(env_pair.key, 'linux')) }}
           mesaopengl: ${{ and(coalesce(env['mesaopengl'], parameters.mesaopengl, false), eq(env_pair.key, 'windows')) }}
@@ -186,25 +187,17 @@ jobs:
             displayName: install tox-conda
 
         - ${{ if variables.docker_image }}:
-          - ${{ if not(eq(variables.toxverspec, '')) }}:
-            - script: docker exec -i -w /project ${{ variables.docker_name }} ${{ variables.setarch }} ${{ variables.docker_python_exec }} -m pip install 'tox${{ variables.toxverspec }}' ${{ variables.toxdeps }}
-              displayName: Install tox
-          
-          - ${{ if eq(variables.toxverspec, '') }}:
-            - script: docker exec -i -w /project ${{ variables.docker_name }} ${{ variables.setarch }} ${{ variables.docker_python_exec }} -m pip install --upgrade tox ${{ variables.toxdeps }}
-              displayName: Install tox
+
+          - script: docker exec -i -w /project ${{ variables.docker_name }} ${{ variables.setarch }} ${{ variables.docker_python_exec }} -m pip install --upgrade 'tox ${{ variables.toxverspec }}' ${{ variables.toxdeps }}
+            displayName: Install tox
 
           - script: docker exec -i -w /project ${{ variables.docker_name }} ${{ variables.setarch }} ${{ variables.docker_python_exec }} -m tox -e ${{ env_pair.value }} ${{ variables['toxargs'] }} -- ${{ variables['pytest_flag'] }} ${{ variables['posargs'] }}
             displayName: Running tox
 
         - ${{ if not(variables.docker_image) }}:
-          - ${{ if not(eq(variables.toxverspec, '')) }}:
-            - script: python -m pip install 'tox${{ variables.toxverspec }}' ${{ variables.toxdeps }}
-              displayName: Install tox
           
-          - ${{ if eq(variables.toxverspec, '') }}:
-            - script: python -m pip install --upgrade tox ${{ variables.toxdeps }}
-              displayName: Install tox
+          - script: python -m pip install 'tox ${{ variables.toxverspec }}' ${{ variables.toxdeps }}
+            displayName: Install tox
 
           - script: python -m tox -e ${{ env_pair.value }} ${{ variables['toxargs'] }} -- ${{ variables['pytest_flag'] }} ${{ variables['posargs'] }}
             displayName: Running tox
