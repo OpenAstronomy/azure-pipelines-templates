@@ -37,6 +37,12 @@ stages:
 
     - template: run-tox-env.yml
       parameters:
+        toxverspec: ==3.27.1
+        envs:
+        - linux: testtoxverspec
+
+    - template: run-tox-env.yml
+      parameters:
         envs:
         - linux: testtoxargs
           toxargs: --notest
